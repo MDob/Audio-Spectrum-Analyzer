@@ -136,6 +136,7 @@ C_SRCS +=  \
 ../src/spi_cfg.c \
 ../src/usart_callback.c \
 ../src/usart_cfg.c \
+../src/usart_ctrl.c \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/list.c \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/queue.c \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/tasks.c \
@@ -187,6 +188,7 @@ src/led_ctrl.o \
 src/spi_cfg.o \
 src/usart_callback.o \
 src/usart_cfg.o \
+src/usart_ctrl.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/list.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/queue.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/tasks.o \
@@ -231,6 +233,7 @@ src/led_ctrl.o \
 src/spi_cfg.o \
 src/usart_callback.o \
 src/usart_cfg.o \
+src/usart_ctrl.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/list.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/queue.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/tasks.o \
@@ -275,6 +278,7 @@ src/led_ctrl.d \
 src/spi_cfg.d \
 src/usart_callback.d \
 src/usart_cfg.d \
+src/usart_ctrl.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/list.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/queue.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/tasks.d \
@@ -319,6 +323,7 @@ src/led_ctrl.d \
 src/spi_cfg.d \
 src/usart_callback.d \
 src/usart_cfg.d \
+src/usart_ctrl.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/list.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/queue.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/tasks.d \
@@ -361,6 +366,8 @@ LINKER_SCRIPT_DEP+=  \
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

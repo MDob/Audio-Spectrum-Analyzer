@@ -1,6 +1,11 @@
-/*
- * led_ctrl.c
+/*************************************************************************
+ *  File Name:      led_ctrl.c
+ *  Author:         Michael Dobinson
+ *  Date Created:   2015-10-24
  *
- * Created: 2015-10-24 1:09:03 PM
- *  Author: Michael
- */ 
+ *  Brief:
+ *      
+ *
+ *  [Compiled and tested with Atmel Studio 7]
+ *
+*************************************************************************/

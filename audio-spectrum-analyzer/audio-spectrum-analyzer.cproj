@@ -733,6 +733,9 @@
     <Compile Include="src\usart_cfg.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\usart_ctrl.c">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\ASF\thirdparty\freertos\freertos-8.0.1\Source\portable\GCC\ARM_CM0\portmacro.h">
       <SubType>compile</SubType>
     </None>

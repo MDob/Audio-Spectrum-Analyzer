@@ -18,6 +18,7 @@
 *.srec
 *.mk
 *.S
+*.atsuo
  
 # User-specific files #
 #######################

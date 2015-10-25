@@ -1,15 +1,23 @@
-/*
- * dma_cfg.h
+/*************************************************************************
+ *  File Name:      dma_cfg.h
+ *  Author:         Michael Dobinson
+ *  Date Created:   2015-10-23
  *
- * Created: 2015-10-24 1:24:58 PM
- *  Author: Michael
- */ 
-
+ *  Sub-files:
+ *      dma_cfg.c
+ *      dma_callback.c
+ *
+ *  Brief:
+ *      Provides configuration settings for DMA
+ *
+ *  [Compiled and tested with Atmel Studio 7]
+ *
+*************************************************************************/
 #ifndef DMA_CFG_H_
 #define DMA_CFG_H_
 
 /*======================================================================*/
-/*							GLOBAL DEPENDENCIES							*/
+/*                          GLOBAL DEPENDENCIES                         */
 /*======================================================================*/
 #include "compiler.h"
 #include "user_board.h"
@@ -18,14 +26,14 @@
 #include "usart_cfg.h"
 
 /*======================================================================*/
-/*						GLOBAL CONSTANT DEFINITIONS						*/
+/*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
-#define LED_BUFFER_LEN			64
-#define FTDI_BUFFER_LEN			4
-#define BLUETOOTH_BUFFER_LEN	128
+#define LED_BUFFER_LEN          4
+#define FTDI_BUFFER_LEN         4
+#define BLUETOOTH_BUFFER_LEN    4
 
 /*======================================================================*/
-/*						GLOBAL VARIABLE DEFINITIONS						*/
+/*                      GLOBAL VARIABLE DEFINITIONS                     */
 /*======================================================================*/
 
 /* DMA Descriptors */
@@ -43,16 +51,16 @@ DmacDescriptor DMA_RxBluetoothDescriptor;
 
 /* DMA Completion Flags */
 enum DMA_Status_Flags {
-	LED_TX_DONE,
-	LED_RX_DONE,
-	
-	FTDI_TX_DONE,
-	FTDI_RX_DONE,
-	
-	BT_TX_DONE,
-	BT_RX_DONE,
-	
-	MAX_DMA_STATUSES
+    LED_TX_DONE,
+    LED_RX_DONE,
+    
+    FTDI_TX_DONE,
+    FTDI_RX_DONE,
+    
+    BT_TX_DONE,
+    BT_RX_DONE,
+    
+    MAX_DMA_STATUSES
 };
 
 /* Global DMA Resources */
@@ -76,25 +84,25 @@ uint16_t Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
 uint16_t Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
 
 /*======================================================================*/
-/*					  EXPORTED VARIABLE DEFINITIONS						*/
+/*                    EXPORTED VARIABLE DEFINITIONS                     */
 /*======================================================================*/
 extern volatile uint8_t* pDMA_Status;
 
 /*======================================================================*/
-/*					  EXTERNAL FUNCTION PROTOTYPES						*/
+/*                    EXTERNAL FUNCTION PROTOTYPES                      */
 /*======================================================================*/
-
 void dma_LEDTxDone( struct dma_resource* const resource );
-void dma_FTDITxDone( struct dma_resource* const resource );
-void dma_FTDIRxDone( struct dma_resource* const resource );
-void dma_BluetoothTxDone( struct dma_resource* const resource );
-void dma_BluetoothRxDone( struct dma_resource* const resource );
 void dma_LEDRxDone( struct dma_resource* const resource );
 
-/*======================================================================*/
-/*						FUNCTION PROTOTYPES								*/
-/*======================================================================*/
+void dma_FTDITxDone( struct dma_resource* const resource );
+void dma_FTDIRxDone( struct dma_resource* const resource );
 
+void dma_BluetoothTxDone( struct dma_resource* const resource );
+void dma_BluetoothRxDone( struct dma_resource* const resource );
+
+/*======================================================================*/
+/*                      FUNCTION PROTOTYPES                             */
+/*======================================================================*/
 void DMA_init( void );
 
 void DMA_configureLED( void );
