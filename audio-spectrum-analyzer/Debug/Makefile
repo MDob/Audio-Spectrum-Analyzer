@@ -128,12 +128,14 @@ C_SRCS +=  \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/croutine.c \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/event_groups.c \
 ../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/GCC/ARM_CM0/port.c \
-../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_1.c \
+../src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_4.c \
 ../src/config_sw.c \
 ../src/dma_callback.c \
 ../src/dma_cfg.c \
+../src/led_cfg.c \
 ../src/led_ctrl.c \
 ../src/spi_cfg.c \
+../src/spi_ctrl.c \
 ../src/usart_callback.c \
 ../src/usart_cfg.c \
 ../src/usart_ctrl.c \
@@ -180,12 +182,14 @@ src/ASF/sam0/drivers/sercom/sercom.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/croutine.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/event_groups.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/GCC/ARM_CM0/port.o \
-src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_1.o \
+src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_4.o \
 src/config_sw.o \
 src/dma_callback.o \
 src/dma_cfg.o \
+src/led_cfg.o \
 src/led_ctrl.o \
 src/spi_cfg.o \
+src/spi_ctrl.o \
 src/usart_callback.o \
 src/usart_cfg.o \
 src/usart_ctrl.o \
@@ -225,12 +229,14 @@ src/ASF/sam0/drivers/sercom/sercom.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/croutine.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/event_groups.o \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/GCC/ARM_CM0/port.o \
-src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_1.o \
+src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_4.o \
 src/config_sw.o \
 src/dma_callback.o \
 src/dma_cfg.o \
+src/led_cfg.o \
 src/led_ctrl.o \
 src/spi_cfg.o \
+src/spi_ctrl.o \
 src/usart_callback.o \
 src/usart_cfg.o \
 src/usart_ctrl.o \
@@ -270,12 +276,14 @@ src/ASF/sam0/drivers/sercom/sercom.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/croutine.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/event_groups.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/GCC/ARM_CM0/port.d \
-src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_1.d \
+src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_4.d \
 src/config_sw.d \
 src/dma_callback.d \
 src/dma_cfg.d \
+src/led_cfg.d \
 src/led_ctrl.d \
 src/spi_cfg.d \
+src/spi_ctrl.d \
 src/usart_callback.d \
 src/usart_cfg.d \
 src/usart_ctrl.d \
@@ -315,12 +323,14 @@ src/ASF/sam0/drivers/sercom/sercom.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/croutine.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/event_groups.d \
 src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/GCC/ARM_CM0/port.d \
-src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_1.d \
+src/ASF/thirdparty/freertos/freertos-8.0.1/Source/portable/MemMang/heap_4.d \
 src/config_sw.d \
 src/dma_callback.d \
 src/dma_cfg.d \
+src/led_cfg.d \
 src/led_ctrl.d \
 src/spi_cfg.d \
+src/spi_ctrl.d \
 src/usart_callback.d \
 src/usart_cfg.d \
 src/usart_ctrl.d \
@@ -366,6 +376,10 @@ LINKER_SCRIPT_DEP+=  \
 
 
 # AVR32/GNU C Compiler
+
+
+
+
 
 
 

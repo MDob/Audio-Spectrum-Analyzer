@@ -29,7 +29,7 @@
 /*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
 #define LED_BUFFER_LEN          4
-#define FTDI_BUFFER_LEN         4
+#define FTDI_BUFFER_LEN         1
 #define BLUETOOTH_BUFFER_LEN    4
 
 /*======================================================================*/
@@ -50,15 +50,11 @@ DmacDescriptor DMA_TxBluetoothDescriptor;
 DmacDescriptor DMA_RxBluetoothDescriptor;
 
 /* DMA Completion Flags */
+/* Note: RX_DONE flags implemented with semaphores */
 enum DMA_Status_Flags {
     LED_TX_DONE,
-    LED_RX_DONE,
-    
     FTDI_TX_DONE,
-    FTDI_RX_DONE,
-    
     BT_TX_DONE,
-    BT_RX_DONE,
     
     MAX_DMA_STATUSES
 };

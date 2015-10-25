@@ -5,6 +5,7 @@
  *
  *  Sub-files:
  *      spi_cfg.c
+ *      spi_ctrl.c
  *
  *  Brief:
  *      Provides configuration settings for SPI
@@ -20,6 +21,9 @@
 /*======================================================================*/
 #include "compiler.h"
 #include "user_board.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+
 #include "spi.h"
 
 /*======================================================================*/
@@ -46,6 +50,15 @@ static const uint32_t buffer_tx[BUFFER_LENGTH] = {
 };
 
 struct spi_module spi_instanceLED;
+
+SemaphoreHandle_t txSemaphoreLED;
+SemaphoreHandle_t rxSemaphoreLED;
+
+/*======================================================================*/
+/*                      EXTERNAL FUNCTION PROTOTYPES                    */
+/*======================================================================*/
+void TASK_SendSPI( void *pvParameters );
+void TASK_ReadSPI( void *pvParameters );
 
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */

@@ -19,10 +19,10 @@
 /*                            DEPENDENCIES                              */
 /*======================================================================*/
 #include <asf.h>
+#include "config_sw.h"
 #include "spi_cfg.h"
 #include "usart_cfg.h"
-#include "led_ctrl.h"
-#include "config_sw.h"
+#include "led_cfg.h"
 #include "dma_cfg.h"
 
 /*======================================================================*/
@@ -101,7 +101,6 @@ static void setupHardware( void )
     system_init();
     system_interrupt_enable_global();
     SysTick_Config(system_gclk_gen_get_hz(GCLK_GENERATOR_0));
-    //delay_init();
     
     /* GPIO Initialization */
     CONFIG_configurePins();
@@ -115,20 +114,31 @@ static void setupHardware( void )
 
 static void setupTasks( void )
 {
-    /*===================== FreeRTOS TASK DECLARATIONS - PRIORITY 4 ====================*/
+    /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 4 ========================*/
     // None 
 
-    /*===================== FreeRTOS TASK DECLARATIONS - PRIORITY 3 ====================*/
+    /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 3 ========================*/
     // None
 
-    /*===================== FreeRTOS TASK DECLARATIONS - PRIORITY 2 ====================*/
+    /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 2 ========================*/
     // None
 
-    /*===================== FreeRTOS TASK DECLARATIONS - PRIORITY 1 ====================*/
-    xTaskCreate( TASK_EchoFTDI,    (const char*) "ECHO",       100,    NULL,   1,  NULL);
+    /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 1 ========================*/
+    
+    /* FTDI Tasks */
+    xTaskCreate( TASK_ReadFTDI,         (const char*) "ECHO",       100,    NULL,   1,  NULL);   
+    
+    /* Bluetooth Tasks */
+    //xTaskCreate( TASK_ReadBluetooth,    (const char*) "BLUETOOTH",  100,    NULL,   1,  NULL);
+    
+    /* SPI Tasks */
+    //xTaskCreate( TASK_SendSPI,          (const char*) "SPI_TX",     100,    NULL,   1,  NULL);
+    //xTaskCreate( TASK_ReadSPI,          (const char*) "SPI_RX",     100,    NULL,   1,  NULL);
 
-    /*===================== FreeRTOS TASK DECLARATIONS - PRIORITY 0 ====================*/
-    xTaskCreate( TASK_Heartbeat,    (const char*) "HEARTBEAT",  100,    NULL,   1,  NULL);
+    /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 0 ========================*/
+    
+    /* Misc Tasks */
+    xTaskCreate( TASK_Heartbeat,        (const char*) "HEARTBEAT",  100,    NULL,   0,  NULL);
 }
 
 int main (void)

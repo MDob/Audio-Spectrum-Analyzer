@@ -1,10 +1,10 @@
 /*************************************************************************
- *  File Name:      usart_ctrl.c
+ *  File Name:      spi_ctrl.c
  *  Author:         Michael Dobinson
  *  Date Created:   2015-10-24
  *
  *  Brief:
- *      Contains FreeRTOS tasks for USART and other control 
+ *      Contains FreeRTOS tasks for SPI and other control
  *      related functions.
  *
  *  [Compiled and tested with Atmel Studio 7]
@@ -14,64 +14,55 @@
 /*======================================================================*/
 /*                          LOCAL DEPENDENCIES                          */
 /*======================================================================*/
-#include "usart_cfg.h"
+#include "spi_cfg.h"
 #include "dma_cfg.h"
 #include "task.h"
 
 /*======================================================================*/
 /*                         FUNCTION DECLARATIONS                        */
 /*======================================================================*/
-void TASK_ReadFTDI( void *pvParameters )
+void TASK_SendSPI( void *pvParameters )
 {
     UNUSED( pvParameters );
     
     /* Create a semaphore */
-    rxSemaphoreFTDI = xSemaphoreCreateBinary();
+    txSemaphoreLED = xSemaphoreCreateBinary();
     
     /* Ensure that semaphore is valid */
-    Assert( rxSemaphoreFTDI );
+    Assert( txSemaphoreLED );
     
-    /* Start DMA reception */
-    dma_start_transfer_job( &zDMA_FTDIResourceRx );
-
     for(;;)
     {
-        /* Block task until DMA read complete */
-        xSemaphoreTake( rxSemaphoreFTDI, portMAX_DELAY );
+        /* Take semaphore from led_ctrl */
+        //xSemaphoreTake( txSemaphoreLED, portMAX_DELAY );
         
-        /* Copy reception buffer to transmission buffer */
-        memcpy( FTDI_TxBuffer, (const uint8_t* ) FTDI_RxBuffer, sizeof( FTDI_RxBuffer ) );
-        
-        /* Send the buffer using DMA */
-        dma_start_transfer_job( &zDMA_FTDIResourceTx );
-        
-        /* Yield to oncoming traffic */
-        taskYIELD();
+        /* Start DMA transfer */
+        // dma_start_transfer_job( &zDMA_LEDResourceTx );
     }
 }
 
-void TASK_ReadBluetooth( void *pvParameters )
+void TASK_ReadSPI( void *pvParameters )
 {
     UNUSED( pvParameters );
     
     /* Create a semaphore */
-    rxSemaphoreBluetooth = xSemaphoreCreateBinary();
+    rxSemaphoreLED = xSemaphoreCreateBinary();
     
-    /* Ensure that the semaphore is valid */
-    Assert( rxSemaphoreBluetooth );
+    /* Ensure that semaphore is valid */
+    Assert( rxSemaphoreLED );
     
     /* Start DMA reception */
-    dma_start_transfer_job( &zDMA_BluetoothResourceRx );
-
+    dma_start_transfer_job( &zDMA_LEDResourceRx );
+    
     for(;;)
     {
         /* Block task until DMA read complete */
-        xSemaphoreTake( rxSemaphoreBluetooth, portMAX_DELAY );
+        xSemaphoreTake( rxSemaphoreLED, portMAX_DELAY );
         
         /* Do something */
         
         /* Respond..? */
-        dma_start_transfer_job( &zDMA_BluetoothResourceTx );
+        dma_start_transfer_job( &zDMA_LEDResourceTx );
         
         /* Yield to oncoming traffic */
         taskYIELD();

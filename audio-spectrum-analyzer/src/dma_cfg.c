@@ -47,9 +47,11 @@ void dma_configureResourceTx( struct dma_resource *tx_resource, uint8_t trigger 
     
     dma_get_config_defaults( &tx_config );
     
+    /* Setup trigger and action configuration */
     tx_config.peripheral_trigger = trigger;
     tx_config.trigger_action = DMA_TRIGGER_ACTON_BEAT;
     
+    /* Allocate DMA channel for resource */
     dma_allocate( tx_resource, &tx_config );
 }
 
@@ -59,9 +61,11 @@ void dma_configureResourceRx( struct dma_resource *rx_resource, uint8_t trigger 
     
     dma_get_config_defaults( &rx_config );
     
+    /* Setup trigger and action configuration */
     rx_config.peripheral_trigger = trigger;
     rx_config.trigger_action = DMA_TRIGGER_ACTON_BEAT;
     
+    /* Allocate DMA channel for resource */
     dma_allocate( rx_resource, &rx_config );
 }
 
@@ -72,12 +76,14 @@ void dma_setupDescriptorTx( DmacDescriptor *tx_descriptor, uint32_t srcAddr,
     
     dma_descriptor_get_config_defaults( &tx_descriptor_config );
     
+    /* Configure descriptor */
     tx_descriptor_config.beat_size              = DMA_BEAT_SIZE_HWORD;
     tx_descriptor_config.dst_increment_enable   = false;
     tx_descriptor_config.block_transfer_count   = bufferLen;
     tx_descriptor_config.source_address         = srcAddr;
     tx_descriptor_config.destination_address    = destAddr;
     
+    /* Configure DMA descriptor with previous configuration */
     dma_descriptor_create( tx_descriptor, &tx_descriptor_config );
 }
 
@@ -88,12 +94,14 @@ void dma_setupDescriptorRx( DmacDescriptor *rx_descriptor, uint32_t srcAddr,
     
     dma_descriptor_get_config_defaults( &rx_descriptor_config );
     
+    /* Configure descriptor */
     rx_descriptor_config.beat_size              = DMA_BEAT_SIZE_HWORD;
     rx_descriptor_config.src_increment_enable   = false;
     rx_descriptor_config.block_transfer_count   = bufferLen;
     rx_descriptor_config.source_address         = srcAddr;
     rx_descriptor_config.destination_address    = destAddr;
     
+    /* Configure DMA descriptor with previous configuration */
     dma_descriptor_create( rx_descriptor, &rx_descriptor_config );
 }
 
