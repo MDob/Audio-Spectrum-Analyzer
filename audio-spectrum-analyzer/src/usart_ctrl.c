@@ -44,6 +44,16 @@ void TASK_ReadFTDI( void *pvParameters )
         
         /* Send the buffer using DMA */
         dma_start_transfer_job( &zDMA_FTDIResourceTx );
+
+        while( !(*pDMA_Status & _LS(FTDI_TX_DONE)))
+        {
+            taskYIELD();
+        }
+        
+        *pDMA_Status &= ~_LS(FTDI_TX_DONE);
+        
+        /* Keep reading */
+        //dma_start_transfer_job( &zDMA_FTDIResourceRx );
         
         /* Yield to oncoming traffic */
         taskYIELD();

@@ -21,12 +21,18 @@
 /************************************************************************/
 /*                      GLOBAL VARIABLE DECLARATIONS                    */
 /************************************************************************/
-volatile uint8_t DMA_Status = 0;
-volatile uint8_t *pDMA_Status = &DMA_Status;
+volatile uint8_t DMA_Status     = 0x00;
+volatile uint8_t *pDMA_Status   = &DMA_Status;
 
 /************************************************************************/
 /*                         FUNCTION DECLARATIONS                        */
 /************************************************************************/
+void dma_LEDDone( struct dma_resource* const resource )
+{
+    /* Set status flag */
+    DMA_Status |= _LS( LED_TX_DONE );
+}
+
 void dma_LEDTxDone( struct dma_resource* const resource )
 {
     /* Set status flag */

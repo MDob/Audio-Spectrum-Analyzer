@@ -28,22 +28,21 @@
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
 /*======================================================================*/
-void LED_allocateMemory( void )
-{
+//void LED_allocateMemory( void )
+//{
     /* Calculate 32-bit blocks to allocate */
-    uint32_t bytesToAllocate =  ( uint32_t ) CEILING( ( SPI_BITS_PER_LED * LED_NUM ), 32 );
+    //uint32_t bytesToAllocate =  ( uint32_t ) CEILING( ( SPI_BITS_PER_LED * LED_NUM ), 32 );
     
     /* Allocate memory */
-    LED_TxBuffer = ( uint32_t* ) pvPortMalloc( bytesToAllocate );
-}
+    //LED_TxBuffer = ( uint32_t* ) pvPortMalloc( bytesToAllocate * sizeof(uint8_t ));
+//}
 
-void LED_deallocateMemory( void )
+/*void LED_deallocateMemory( void )
 {
-    /* Free memory */
     vPortFree( LED_TxBuffer );
-}
+}*/
 
-void LED_setLED( LED_Data* LED, uint16_t num )
+void LED_setLED( LED_Data_t* LED, uint16_t num )
 {
     uint8_t *pLEDArray = ledArray;
     
@@ -51,7 +50,7 @@ void LED_setLED( LED_Data* LED, uint16_t num )
     memcpy( pLEDArray, LED->data, sizeof( uint8_t ) * BYTES_PER_LED );
 }
 
-void LED_setStripUniform( LED_Data* colourData )
+void LED_setStripUniform( LED_Data_t* colourData )
 {
     uint8_t LED_index = 0;
     uint8_t *pLEDArray = ledArray;

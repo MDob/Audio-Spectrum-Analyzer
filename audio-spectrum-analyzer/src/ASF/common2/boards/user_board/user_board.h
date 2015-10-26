@@ -31,7 +31,11 @@ void system_board_init(void);
 /*======================================================================*/
 /*                      GLOBAL MACRO DEFINITIONS                        */
 /*======================================================================*/
-#define _LS(x) (1 << x)
+#define _LS( x ) ( 1 << x )
+#define _RS( x ) ( 1 >> x )
+
+#define _LSVAR( x, y ) ( x << y )
+#define _RSVAR( x, y ) ( x >> y )
 
 /*======================================================================*/
 /*                     GLOBAL CONSTANT DEFINITIONS                      */
@@ -79,6 +83,16 @@ void system_board_init(void);
 #define LED_SPI_SERCOM_DMAC_ID_RX       SERCOM0_DMAC_ID_RX
 
 #define LED_SS_PIN                      PIN_PA05
+
+/* LED Output PWM Definitions */
+#define LED_PWM_MODULE                  TCC1
+#define LED_PWM_CHANNEL                 0
+#define LED_PWM_OUTPUT                  0
+#define LED_PWM_PIN                     PIN_PA06E_TCC1_WO0
+#define LED_PWM_MUX                     MUX_PA06E_TCC1_WO0
+#define LED_PWM_PINMUX                  PINMUX_PA06E_TCC1_WO0
+
+#define LED_PWM_DMAC_ID                 TCC1_DMAC_ID_OVF
 
 /* FTDI USART Defintions */
 #define FTDI_USART_MODULE               SERCOM1

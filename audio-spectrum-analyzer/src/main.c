@@ -24,6 +24,7 @@
 #include "usart_cfg.h"
 #include "led_cfg.h"
 #include "dma_cfg.h"
+#include "pwm_cfg.h"
 
 /*======================================================================*/
 /*                         FUNCTION PROTOTYPES                          */
@@ -107,8 +108,9 @@ static void setupHardware( void )
     CONFIG_configureWDT();
     
     /* Comms Initialization */
-    SPI_configureLED();
+    //SPI_configureLED();
     USART_init();
+    PWM_init();
     DMA_init();
 }
 
@@ -121,24 +123,26 @@ static void setupTasks( void )
     // None
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 2 ========================*/
-    // None
+    
+    /* FTDI Tasks */
+    //xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   2,  NULL );
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 1 ========================*/
     
-    /* FTDI Tasks */
-    xTaskCreate( TASK_ReadFTDI,         (const char*) "ECHO",       100,    NULL,   1,  NULL);   
+    /* LED Tasks */
+    xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );
     
     /* Bluetooth Tasks */
-    //xTaskCreate( TASK_ReadBluetooth,    (const char*) "BLUETOOTH",  100,    NULL,   1,  NULL);
+    //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
     
     /* SPI Tasks */
-    //xTaskCreate( TASK_SendSPI,          (const char*) "SPI_TX",     100,    NULL,   1,  NULL);
-    //xTaskCreate( TASK_ReadSPI,          (const char*) "SPI_RX",     100,    NULL,   1,  NULL);
+    //xTaskCreate(    TASK_SendSPI,           ( const char* ) "SPI_TX",       100,    NULL,   1,  NULL );
+    //xTaskCreate(    TASK_ReadSPI,           ( const char* ) "SPI_RX",       100,    NULL,   1,  NULL );
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 0 ========================*/
     
     /* Misc Tasks */
-    xTaskCreate( TASK_Heartbeat,        (const char*) "HEARTBEAT",  100,    NULL,   0,  NULL);
+    xTaskCreate(    TASK_Heartbeat,         ( const char* ) "HEARTBEAT",    100,    NULL,   0,  NULL );
 }
 
 int main (void)

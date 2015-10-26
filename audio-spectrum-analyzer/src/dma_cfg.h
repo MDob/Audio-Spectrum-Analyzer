@@ -24,11 +24,20 @@
 #include "dma.h"
 #include "spi_cfg.h"
 #include "usart_cfg.h"
+#include "led_cfg.h"
 
 /*======================================================================*/
 /*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
-#define LED_BUFFER_LEN          4
+#define LED_NUM                 144
+#define INT_PER_LED             3
+
+#define LED_TX_BUFFER_LEN       LED_NUM * INT_PER_LED
+#define LED_RX_BUFFER_LEN       4
+
+#define LED_BUFF_PADDING        2
+#define LED_PWM_BUFFER_LEN      (LED_NUM * 24) + LED_BUFF_PADDING
+
 #define FTDI_BUFFER_LEN         1
 #define BLUETOOTH_BUFFER_LEN    4
 
@@ -49,6 +58,9 @@ COMPILER_ALIGNED(16)
 DmacDescriptor DMA_TxBluetoothDescriptor;
 DmacDescriptor DMA_RxBluetoothDescriptor;
 
+COMPILER_ALIGNED(16)
+DmacDescriptor DMA_LedPWMDescriptor;
+
 /* DMA Completion Flags */
 /* Note: RX_DONE flags implemented with semaphores */
 enum DMA_Status_Flags {
@@ -63,6 +75,8 @@ enum DMA_Status_Flags {
 struct dma_resource zDMA_LEDResourceTx;
 struct dma_resource zDMA_LEDResourceRx;
 
+struct dma_resource zDMA_LEDResourcePWM;
+
 struct dma_resource zDMA_FTDIResourceTx;
 struct dma_resource zDMA_FTDIResourceRx;
 
@@ -70,14 +84,18 @@ struct dma_resource zDMA_BluetoothResourceTx;
 struct dma_resource zDMA_BluetoothResourceRx;
 
 /* DMA Buffers */
-uint32_t *LED_TxBuffer;
-uint8_t LED_RxBuffer[LED_BUFFER_LEN];
+#ifdef USING_SPI
+uint32_t    LED_TxBuffer[LED_TX_BUFFER_LEN];
+uint8_t     LED_RxBuffer[LED_RX_BUFFER_LEN];
+#endif
 
-uint16_t FTDI_TxBuffer[FTDI_BUFFER_LEN];
-uint16_t FTDI_RxBuffer[FTDI_BUFFER_LEN];
+uint16_t    FTDI_TxBuffer[FTDI_BUFFER_LEN];
+uint16_t    FTDI_RxBuffer[FTDI_BUFFER_LEN];
 
-uint16_t Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
-uint16_t Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
+uint16_t    Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
+uint16_t    Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
+
+uint8_t     LED_PWMBuffer[LED_PWM_BUFFER_LEN];
 
 /*======================================================================*/
 /*                    EXPORTED VARIABLE DEFINITIONS                     */
@@ -96,12 +114,15 @@ void dma_FTDIRxDone( struct dma_resource* const resource );
 void dma_BluetoothTxDone( struct dma_resource* const resource );
 void dma_BluetoothRxDone( struct dma_resource* const resource );
 
+void dma_LEDDone( struct dma_resource* const resource );
+
 /*======================================================================*/
 /*                      FUNCTION PROTOTYPES                             */
 /*======================================================================*/
 void DMA_init( void );
 
-void DMA_configureLED( void );
+void DMA_configureLEDSPI( void );
+void DMA_configureLEDPWM( void );
 void DMA_configureFTDI( void );
 void DMA_configureBluetooth( void );
 

@@ -26,13 +26,12 @@
 /*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
 #define LED_TYPE    WS2812B
-#define LED_NUM     144
+#define MAX_LED_NUM 144
 
 #define LED_1_CODE          0b11100000000000000000000000000000
-#define LED_0_CODE          0b10000000000000000000000000000000
+#define LED_0_CODE          0b11000000000000000000000000000000
+#define INPUT_MASK			0b10000000
 
-#define CODES_PER_32BITS    6
-#define LED_NUM             144
 #define LED_BITS_PER_BIT    4
 #define LED_BITS_PER_LED    24
 #define SPI_BITS_PER_LED    LED_BITS_PER_BIT * LED_BITS_PER_LED
@@ -52,12 +51,13 @@ typedef union LED_Data
         uint8_t blue;
     }colour;
     
-}LED_Data;
+}LED_Data_t;
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */
 /*======================================================================*/
-uint8_t ledArray[LED_NUM * 3];
+uint8_t ledArray[MAX_LED_NUM * 3];
+SemaphoreHandle_t LEDSemaphore;
 
 /*======================================================================*/
 /*                     EXTERNAL FUNCTION PROTOTYPES                     */
@@ -67,11 +67,11 @@ void TASK_outputFormingLED( void *pvParameters );
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */
 /*======================================================================*/
-void LED_allocateMemory( void );
-void LED_deallocateMemory( void );
+//void LED_allocateMemory( void );
+//void LED_deallocateMemory( void );
 
-void LED_setLED( LED_Data* LED, uint16_t num );
-void LED_setStripUniform( LED_Data* colourData );
+void LED_setLED( LED_Data_t* LED, uint16_t num );
+void LED_setStripUniform( LED_Data_t* colourData );
 void LED_setStripBrightnessRelative( uint8_t relativeBrightness );
 
 #endif /* LED_CTRL_H_ */
