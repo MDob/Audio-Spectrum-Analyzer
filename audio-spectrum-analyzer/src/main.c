@@ -123,14 +123,15 @@ static void setupTasks( void )
     // None
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 2 ========================*/
-    
-    /* FTDI Tasks */
-    //xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   2,  NULL );
+    // None
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 1 ========================*/
     
     /* LED Tasks */
     xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );
+    
+    /* FTDI Tasks */
+    xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   1,  NULL );
     
     /* Bluetooth Tasks */
     //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );

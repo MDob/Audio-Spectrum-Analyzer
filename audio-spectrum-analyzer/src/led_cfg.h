@@ -59,6 +59,23 @@ typedef union LED_Data
 uint8_t ledArray[MAX_LED_NUM * 3];
 SemaphoreHandle_t LEDSemaphore;
 
+enum colourNames{
+    COLOUR_RED,
+    COLOUR_ORANGE,
+    COLOUR_YELLOW,
+    COLOUR_GREEN,
+    COLOUR_AQUA,
+    COLOUR_BLUE,
+    COLOUR_PURPLE,
+    COLOUR_PINK,
+    
+    MAX_COLOURS
+};
+
+/*const ledColours[MAX_COLOURS][3] = {
+    {255, }
+}*/
+
 /*======================================================================*/
 /*                     EXTERNAL FUNCTION PROTOTYPES                     */
 /*======================================================================*/

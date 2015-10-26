@@ -22,7 +22,7 @@ void dma_configureResource(struct dma_resource *resource, uint8_t trigger);
 
 void dma_setupDescriptor(   DmacDescriptor *descriptor, uint32_t srcAddr,
                             uint32_t destAddr, uint16_t bufferLen, 
-                            uint8_t beat_size );
+                            uint8_t beat_size, bool src_inc, bool dest_inc );
 
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
@@ -59,18 +59,19 @@ void dma_configureResource( struct dma_resource *resource, uint8_t trigger )
 
 void dma_setupDescriptor(   DmacDescriptor *descriptor, uint32_t srcAddr,
                             uint32_t destAddr, uint16_t bufferLen, 
-                            uint8_t beat_size )
+                            uint8_t beat_size, bool src_inc, bool dest_inc )
 {
     struct dma_descriptor_config descriptor_config;
     
     dma_descriptor_get_config_defaults( &descriptor_config );
     
     /* Configure descriptor */
-    descriptor_config.beat_size              = beat_size;
-    descriptor_config.dst_increment_enable   = false;
-    descriptor_config.block_transfer_count   = bufferLen;
-    descriptor_config.source_address         = srcAddr;
-    descriptor_config.destination_address    = destAddr;
+    descriptor_config.beat_size             = beat_size;
+    descriptor_config.dst_increment_enable  = dest_inc;
+    descriptor_config.src_increment_enable  = src_inc;
+    descriptor_config.block_transfer_count  = bufferLen;
+    descriptor_config.source_address        = srcAddr;
+    descriptor_config.destination_address   = destAddr;
     
     /* Configure DMA descriptor with previous configuration */
     dma_descriptor_create( descriptor, &descriptor_config );
@@ -93,11 +94,11 @@ void DMA_configureLEDSPI( void )
     /* Setup DMA Tx/Rx descriptors */
     dma_setupDescriptor(    &DMA_TxLEDDescriptor, txSourceAddress,
                             txDestinationAddress, LED_TX_BUFFER_LEN, 
-                            DMA_BEAT_SIZE_HWORD );
+                            DMA_BEAT_SIZE_HWORD, true, false );
                             
     dma_setupDescriptor(    &DMA_RxLEDDescriptor, rxSourceAddress,
                             rxDestinationAddress, LED_RX_BUFFER_LEN, 
-                            DMA_BEAT_SIZE_HWORD );
+                            DMA_BEAT_SIZE_HWORD, true, false );
     
     /* Add DMA Tx/Rx descriptors to DMA Tx/Rx resources */
     dma_add_descriptor( &zDMA_LEDResourceTx, &DMA_TxLEDDescriptor );
@@ -122,7 +123,7 @@ void DMA_configureLEDPWM( void )
     
     dma_setupDescriptor(    &DMA_LedPWMDescriptor, sourceAddress, 
                             destinationAddress, LED_PWM_BUFFER_LEN,
-                            DMA_BEAT_SIZE_BYTE );
+                            DMA_BEAT_SIZE_BYTE, true, false );
     
     dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
     //dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
@@ -147,12 +148,12 @@ void DMA_configureFTDI( void )
     
     /* Setup DMA Tx/Rx descriptors */
     dma_setupDescriptor(    &DMA_TxFTDIDescriptor, txSourceAddress,
-                            txDestinationAddress, FTDI_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD );
+                            txDestinationAddress, FTDI_TX_BUFFER_LEN,
+                            DMA_BEAT_SIZE_HWORD, true, false );
                             
     dma_setupDescriptor(    &DMA_RxFTDIDescriptor, rxSourceAddress,
-                            rxDestinationAddress, FTDI_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD );
+                            rxDestinationAddress, FTDI_RX_BUFFER_LEN,
+                            DMA_BEAT_SIZE_HWORD, false, true );
 
     /* Add DMA Tx/Rx descriptors to DMA Tx/Rx resources */
     dma_add_descriptor( &zDMA_FTDIResourceTx, &DMA_TxFTDIDescriptor );
@@ -182,11 +183,11 @@ void DMA_configureBluetooth( void )
     /* Setup DMA Tx/Rx descriptors */
     dma_setupDescriptor(    &DMA_TxBluetoothDescriptor, txSourceAddress,
                             txDestinationAddress, BLUETOOTH_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD );
+                            DMA_BEAT_SIZE_HWORD, true, false );
                             
     dma_setupDescriptor(    &DMA_RxBluetoothDescriptor, rxSourceAddress,
                             rxDestinationAddress, BLUETOOTH_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD );
+                            DMA_BEAT_SIZE_HWORD, false, true );
 
     /* Add DMA Tx/Rx descriptors to DMA Tx/Rx resources */
     dma_add_descriptor( &zDMA_BluetoothResourceTx, &DMA_TxBluetoothDescriptor );

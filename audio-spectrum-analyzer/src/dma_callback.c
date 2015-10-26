@@ -67,19 +67,22 @@ void dma_FTDITxDone( struct dma_resource* const resource )
 
 void dma_FTDIRxDone( struct dma_resource* const resource )
 {
-    static portBASE_TYPE wake_task = pdFALSE;
+    static BaseType_t xHigherPriorityTaskWoken;
+    
+    /* Set status flag */
+    DMA_Status |= _LS( FTDI_RX_DONE );
+    
+    xHigherPriorityTaskWoken = pdFALSE;
     
     /* Unblock parsing task */
-    xSemaphoreGiveFromISR( rxSemaphoreFTDI, &wake_task );
+    xSemaphoreGiveFromISR( rxSemaphoreFTDI, &xHigherPriorityTaskWoken );
     
-    /* Allow the parsing task to take over */
-    if( wake_task == pdTRUE )
-    {
-        /* Continue reading the incoming FTDI data stream */
-        dma_start_transfer_job(&zDMA_FTDIResourceRx);
-        
-        portYIELD();
-    }    
+    //if( xHigherPriorityTaskWoken == pdTRUE )
+    //{
+    //    dma_start_transfer_job( &zDMA_FTDIResourceRx );
+    //}
+    
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
 void dma_BluetoothTxDone( struct dma_resource* const resource )

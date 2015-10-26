@@ -31,31 +31,33 @@ void TASK_ReadFTDI( void *pvParameters )
     /* Ensure that semaphore is valid */
     Assert( rxSemaphoreFTDI );
     
-    /* Start DMA reception */
+    /* Start reading */
     dma_start_transfer_job( &zDMA_FTDIResourceRx );
 
     for(;;)
     {
         /* Block task until DMA read complete */
-        xSemaphoreTake( rxSemaphoreFTDI, portMAX_DELAY );
-        
-        /* Copy reception buffer to transmission buffer */
-        memcpy( FTDI_TxBuffer, (const uint8_t* ) FTDI_RxBuffer, sizeof( FTDI_RxBuffer ) );
-        
-        /* Send the buffer using DMA */
-        dma_start_transfer_job( &zDMA_FTDIResourceTx );
-
-        while( !(*pDMA_Status & _LS(FTDI_TX_DONE)))
+        if( xSemaphoreTake( rxSemaphoreFTDI, portMAX_DELAY ) == pdTRUE )
         {
+            /* Copy reception buffer to transmission buffer */
+            memcpy( FTDI_TxBuffer, (const uint8_t* ) FTDI_RxBuffer, sizeof( FTDI_RxBuffer ) );
+            
+            /* Send the buffer using DMA */
+            dma_start_transfer_job( &zDMA_FTDIResourceTx );
+
+            while( !(*pDMA_Status & _LS(FTDI_TX_DONE)));
+            
+            *pDMA_Status &= ~_LS(FTDI_TX_DONE);
+            
+            /* Keep reading */
+            dma_start_transfer_job( &zDMA_FTDIResourceRx );
+        }
+        else
+        {
+            /* Yield to oncoming traffic */
             taskYIELD();
         }
         
-        *pDMA_Status &= ~_LS(FTDI_TX_DONE);
-        
-        /* Keep reading */
-        //dma_start_transfer_job( &zDMA_FTDIResourceRx );
-        
-        /* Yield to oncoming traffic */
         taskYIELD();
     }
 }

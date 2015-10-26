@@ -27,36 +27,13 @@ void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_
 /*======================================================================*/
 void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_led )
 {
-    uint8_t     shift_index = 0;
     uint16_t    LED_index;
     uint8_t     byte_index;
-    
-    *outputBuffer = PWM_PERIOD_CYCLES;
-    outputBuffer++;
-    
+   
    for( LED_index = 0; LED_index < ( num_led * BYTES_PER_LED ); LED_index++, inputArray++ )
     {
         for( byte_index = 0; byte_index <= 7; byte_index++ )
         {
-            #ifdef USING_SPI
-            if( *inputArray & _RSVAR( INPUT_MASK, byte_index ) )
-            {
-                *outputBuffer |= _RSVAR( LED_1_CODE, shift_index );
-            }
-            else
-            {
-                *outputBuffer |= _RSVAR( LED_0_CODE, shift_index );
-            }
-                
-            shift_index += LED_BITS_PER_BIT;
-                
-            if( shift_index > 31 )
-            {
-                *( ++outputBuffer ) = 0;
-                shift_index = shift_index - 32;
-            }
-            #endif
-            
             if( *inputArray & _RSVAR( INPUT_MASK, byte_index ) )
             {
                 *outputBuffer = PWM_LED_ONE;
@@ -67,29 +44,20 @@ void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_
             }
             outputBuffer++;
         }
-        //*(outputBuffer++) = PWM_PERIOD_CYCLES;
-        //*(outputBuffer++) = PWM_PERIOD_CYCLES;
     }
-    //outputBuffer--;
+    
+    // Padding
+    *outputBuffer = PWM_PERIOD_CYCLES;
 }
 
 void TASK_outputFormingLED( void *pvParameters )
 {
     UNUSED( pvParameters );
-    uint8_t     *pLEDArray       = ledArray;
-    #ifdef USING_SPI
-    uint32_t    *pLED_TxBuffer   = LED_TxBuffer;
-    #endif
     
+    uint8_t     *pLEDArray       = ledArray;    
     uint8_t     *pLEDPWMArray   = LED_PWMBuffer;
     
-    /* Allocate memory for buffer */
-    //LED_allocateMemory();
-    
-    //LEDSemaphore = xSemaphoreCreateBinary();
-    //Assert( LEDSemaphore );
-    
-    LED_Data_t singleLed;
+    /*LED_Data_t singleLed;
     singleLed.colour.green   = 45;
     singleLed.colour.red     = 225;
     singleLed.colour.blue    = 25;
@@ -102,19 +70,66 @@ void TASK_outputFormingLED( void *pvParameters )
     LED_Data_t onLED;
     onLED.colour.green   = 127;
     onLED.colour.red     = 0;
-    onLED.colour.blue    = 0;
-    
-    LED_Data_t onLED1;
-    onLED1.colour.green   = 255;
-    onLED1.colour.red     = 0;
-    onLED1.colour.blue    = 0;
+    onLED.colour.blue    = 0; 
     
     bool up = false;
     bool col = true;
-    uint8_t sec_led = 0;
+    uint8_t sec_led = 0; */
+    
+    LED_Data_t stripColour = {
+        .colour.red     = 0,
+        .colour.green   = 0,
+        .colour.blue    = 0
+    };
+    
+    uint8_t state = 0;
     
     for(;;)
     {
+        for(uint8_t i = 0; i < LED_NUM; i++)
+        {
+            LED_setLED( &stripColour, i );
+        }
+        
+        // Fade in/out rainbow thing
+        switch( state )
+        {
+            case 0:
+                if( stripColour.colour.blue > 0 )
+                stripColour.colour.blue--;
+                
+                stripColour.colour.red++;
+                if(stripColour.colour.red >= 255)
+                    state = 1;
+                else if(stripColour.colour.red >= 127)
+                    stripColour.colour.green++;
+                break;
+            case 1:
+                if( stripColour.colour.red > 0 )
+                    stripColour.colour.red--;
+                
+                stripColour.colour.green++;
+                if(stripColour.colour.green >= 255)
+                    state = 2;
+                else if(stripColour.colour.green >= 127)
+                    stripColour.colour.blue++;
+                break;
+            case 2:
+                if( stripColour.colour.red > 0 )
+                    stripColour.colour.red--;
+                
+                if( stripColour.colour.green > 0 )
+                    stripColour.colour.green--;
+                    
+                stripColour.colour.blue++;
+                if(stripColour.colour.blue >= 255)
+                    state = 0;
+                break;
+        }
+        
+        // Swirly colour changer
+        // Currently just a proof of concept
+        /*
         for(uint8_t i = 0; i < LED_NUM; i++)
         {
             if( i % 2 )
@@ -154,12 +169,11 @@ void TASK_outputFormingLED( void *pvParameters )
             
             if(singleLed.colour.red <= 0)
                 up = true;
-        }
-        
+        }*/
     
         /* Form the buffer */
         led_formTxBuffer( pLEDArray, pLEDPWMArray, LED_NUM );
-        LED_PWMBuffer[LED_PWM_BUFFER_LEN-1] = PWM_PERIOD_CYCLES;
+        //LED_PWMBuffer[LED_PWM_BUFFER_LEN-1] = PWM_PERIOD_CYCLES;
         
         /* Wait for verification that ledArray is valid */
         //xSemaphoreTake( LEDSemaphore, portMAX_DELAY );
@@ -176,6 +190,6 @@ void TASK_outputFormingLED( void *pvParameters )
         while( ! ( *pDMA_Status & _LS( LED_TX_DONE ) ) );
        
         /* Yield to oncoming traffic */
-        vTaskDelay(10);
+        vTaskDelay(20);
     }
 }

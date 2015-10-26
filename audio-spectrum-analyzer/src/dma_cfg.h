@@ -35,10 +35,11 @@
 #define LED_TX_BUFFER_LEN       LED_NUM * INT_PER_LED
 #define LED_RX_BUFFER_LEN       4
 
-#define LED_BUFF_PADDING        2
+#define LED_BUFF_PADDING        1
 #define LED_PWM_BUFFER_LEN      (LED_NUM * 24) + LED_BUFF_PADDING
 
-#define FTDI_BUFFER_LEN         1
+#define FTDI_RX_BUFFER_LEN      1
+#define FTDI_TX_BUFFER_LEN      32
 #define BLUETOOTH_BUFFER_LEN    4
 
 /*======================================================================*/
@@ -65,8 +66,13 @@ DmacDescriptor DMA_LedPWMDescriptor;
 /* Note: RX_DONE flags implemented with semaphores */
 enum DMA_Status_Flags {
     LED_TX_DONE,
+    LED_RX_DONE,
+    
     FTDI_TX_DONE,
+    FTDI_RX_DONE,
+    
     BT_TX_DONE,
+    BT_RX_DONE,
     
     MAX_DMA_STATUSES
 };
@@ -89,8 +95,8 @@ uint32_t    LED_TxBuffer[LED_TX_BUFFER_LEN];
 uint8_t     LED_RxBuffer[LED_RX_BUFFER_LEN];
 #endif
 
-uint16_t    FTDI_TxBuffer[FTDI_BUFFER_LEN];
-uint16_t    FTDI_RxBuffer[FTDI_BUFFER_LEN];
+uint16_t    FTDI_TxBuffer[FTDI_TX_BUFFER_LEN];
+uint16_t    FTDI_RxBuffer[FTDI_RX_BUFFER_LEN];
 
 uint16_t    Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
 uint16_t    Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
