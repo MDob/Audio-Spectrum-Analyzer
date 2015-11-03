@@ -20,11 +20,13 @@
 /*======================================================================*/
 #include <asf.h>
 #include "config_sw.h"
-#include "spi_cfg.h"
+//#include "spi_cfg.h"
 #include "usart_cfg.h"
 #include "led_cfg.h"
 #include "dma_cfg.h"
 #include "pwm_cfg.h"
+#include "adc_cfg.h"
+#include "comm.h"
 
 /*======================================================================*/
 /*                         FUNCTION PROTOTYPES                          */
@@ -103,15 +105,16 @@ static void setupHardware( void )
     system_interrupt_enable_global();
     SysTick_Config(system_gclk_gen_get_hz(GCLK_GENERATOR_0));
     
-    /* GPIO Initialization */
-    CONFIG_configurePins();
-    CONFIG_configureWDT();
-    
     /* Comms Initialization */
     //SPI_configureLED();
     USART_init();
     PWM_init();
+    ADC_init();
     DMA_init();
+    
+    /* GPIO Initialization */
+    CONFIG_configurePins();
+    CONFIG_configureWDT();
 }
 
 static void setupTasks( void )
@@ -131,7 +134,8 @@ static void setupTasks( void )
     xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );
     
     /* FTDI Tasks */
-    xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   1,  NULL );
+    xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   2,  NULL );
+    xTaskCreate(    TASK_ftdiParser,        ( const char* ) "FTDI",         100,    NULL,   1,  NULL );
     
     /* Bluetooth Tasks */
     //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );

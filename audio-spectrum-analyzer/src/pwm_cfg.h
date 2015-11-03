@@ -25,7 +25,7 @@
 #define PWM_PERIOD_NS       1250
 #define PWM_PERIOD_CYCLES   100      // 1250e-9 * 48e6
 
-#define PWM_LED_ZERO        72      // 20 = 416ns
+#define PWM_LED_ZERO        75      // 20 = 416ns
 #define PWM_LED_ONE         59      // 38 = 791ns
 
 /*======================================================================*/

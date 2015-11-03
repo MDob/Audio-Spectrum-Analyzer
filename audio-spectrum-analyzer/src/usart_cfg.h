@@ -23,6 +23,7 @@
 #include "compiler.h"
 #include "user_board.h"
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "semphr.h"
 
 #include "usart.h"
@@ -48,6 +49,9 @@ uint8_t rx_bufferBluetooth[MAX_CALLBACK_BUFFER_LEN];
 
 SemaphoreHandle_t rxSemaphoreFTDI;
 SemaphoreHandle_t rxSemaphoreBluetooth;
+
+QueueHandle_t xFTDIQueue;
+QueueHandle_t xBTQueue;
 
 /*======================================================================*/
 /*                      EXTERNAL FUNCTION PROTOTYPES                    */

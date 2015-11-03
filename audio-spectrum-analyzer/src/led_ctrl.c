@@ -21,6 +21,9 @@
 /*                           FUNCTION PROTOTYPES                        */
 /*======================================================================*/
 void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_led );
+void led_fadingRainbow( bool reset );
+void led_swirlyColours( bool reset );
+void led_setStrip( LED_Data_t* strip );
 
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
@@ -50,6 +53,145 @@ void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_
     *outputBuffer = PWM_PERIOD_CYCLES;
 }
 
+void led_fadingRainbow( bool reset )
+{
+    static uint8_t state = 0;
+    static LED_Data_t stripColour = {
+        .colour.red     = 0,
+        .colour.green   = 0,
+        .colour.blue    = 0
+    };    
+    
+    if( reset )
+    {
+        // Reset state and stripColour to 0
+        memset(&stripColour, 0x00, sizeof(stripColour));
+        state = 0;
+    }
+    
+    for(uint8_t i = 0; i < LED_NUM; i++)
+    {
+        LED_setLED( &stripColour, i );
+    }
+    
+    switch( state )
+    {
+        case 0:
+            if( stripColour.colour.blue > 0 )
+                stripColour.colour.blue--;
+        
+            stripColour.colour.red++;
+            if(stripColour.colour.red >= 255)
+                state = 1;
+            
+            else if(stripColour.colour.red >= 127)
+            stripColour.colour.green++;
+
+            break;
+            
+        case 1:
+            if( stripColour.colour.red > 0 )
+                stripColour.colour.red--;
+        
+            stripColour.colour.green++;
+            if(stripColour.colour.green >= 255)
+                state = 2;
+                
+            else if(stripColour.colour.green >= 127)
+                stripColour.colour.blue++;
+                
+            break;
+            
+        case 2:
+            if( stripColour.colour.red > 0 )
+                stripColour.colour.red--;
+        
+            if( stripColour.colour.green > 0 )
+                stripColour.colour.green--;
+        
+            stripColour.colour.blue++;
+            if(stripColour.colour.blue >= 255)
+                state = 0;
+                
+            break;
+    }    
+}
+
+void led_swirlyColours( bool reset )
+{
+    static uint8_t sec_led = 0;
+    
+    static bool up = false;
+    static bool col = true;
+    
+    static LED_Data_t singleLed = {
+        .colour.green   = 45,
+        .colour.red     = 225,
+        .colour.blue    = 25,
+    };
+    
+    static LED_Data_t offLED = {
+        .colour.green   = 0,
+        .colour.red     = 0,
+        .colour.blue    = 0,
+    };        
+    
+    static LED_Data_t onLED = {
+        .colour.green   = 127,
+        .colour.red     = 0,
+        .colour.blue    = 0,
+    };    
+
+    for(uint8_t i = 0; i < LED_NUM; i++)
+    {
+        if( i % 2 )
+        {
+            LED_setLED( &singleLed, i );
+            }else{
+            if((i - sec_led) == 0)
+            {
+                LED_setLED( &onLED, i );
+                }else{
+                LED_setLED( &offLED, i );
+            }
+        }
+    }
+    
+    if(col){
+        sec_led += 2;
+        if(sec_led >= 144)
+        col = false;
+        }else{
+        sec_led -= 2;
+        if(sec_led <= 0)
+        col = true;
+    }
+    
+    
+    if(up){
+        singleLed.colour.red++;
+        onLED.colour.red++;
+        
+        if(singleLed.colour.red >= 255)
+        up = false;
+        
+        }else{
+        singleLed.colour.red--;
+        onLED.colour.red--;
+        
+        if(singleLed.colour.red <= 0)
+        up = true;
+    }
+}
+
+void led_setStrip( LED_Data_t* strip )
+{
+    for( uint8_t i = 0; i < LED_NUM; i++ )
+    {
+        LED_setLED( strip, i );
+    }
+}
+
 void TASK_outputFormingLED( void *pvParameters )
 {
     UNUSED( pvParameters );
@@ -57,123 +199,14 @@ void TASK_outputFormingLED( void *pvParameters )
     uint8_t     *pLEDArray       = ledArray;    
     uint8_t     *pLEDPWMArray   = LED_PWMBuffer;
     
-    /*LED_Data_t singleLed;
-    singleLed.colour.green   = 45;
-    singleLed.colour.red     = 225;
-    singleLed.colour.blue    = 25;
-    
-    LED_Data_t offLED;
-    offLED.colour.green   = 0;
-    offLED.colour.red     = 0;
-    offLED.colour.blue    = 0;
-    
-    LED_Data_t onLED;
-    onLED.colour.green   = 127;
-    onLED.colour.red     = 0;
-    onLED.colour.blue    = 0; 
-    
-    bool up = false;
-    bool col = true;
-    uint8_t sec_led = 0; */
-    
-    LED_Data_t stripColour = {
-        .colour.red     = 0,
-        .colour.green   = 0,
-        .colour.blue    = 0
-    };
-    
-    uint8_t state = 0;
-    
     for(;;)
     {
-        for(uint8_t i = 0; i < LED_NUM; i++)
-        {
-            LED_setLED( &stripColour, i );
-        }
-        
-        // Fade in/out rainbow thing
-        switch( state )
-        {
-            case 0:
-                if( stripColour.colour.blue > 0 )
-                stripColour.colour.blue--;
-                
-                stripColour.colour.red++;
-                if(stripColour.colour.red >= 255)
-                    state = 1;
-                else if(stripColour.colour.red >= 127)
-                    stripColour.colour.green++;
-                break;
-            case 1:
-                if( stripColour.colour.red > 0 )
-                    stripColour.colour.red--;
-                
-                stripColour.colour.green++;
-                if(stripColour.colour.green >= 255)
-                    state = 2;
-                else if(stripColour.colour.green >= 127)
-                    stripColour.colour.blue++;
-                break;
-            case 2:
-                if( stripColour.colour.red > 0 )
-                    stripColour.colour.red--;
-                
-                if( stripColour.colour.green > 0 )
-                    stripColour.colour.green--;
-                    
-                stripColour.colour.blue++;
-                if(stripColour.colour.blue >= 255)
-                    state = 0;
-                break;
-        }
-        
-        // Swirly colour changer
-        // Currently just a proof of concept
-        /*
-        for(uint8_t i = 0; i < LED_NUM; i++)
-        {
-            if( i % 2 )
-            {
-                LED_setLED( &singleLed, i );
-            }else{
-                if((i - sec_led) == 0)
-                {
-                    LED_setLED( &onLED, i );                    
-                }else{
-                    LED_setLED( &offLED, i );
-                }                    
-            }
-        }
-        
-        if(col){
-            sec_led += 2;
-            if(sec_led >= 144)
-                col = false;
-        }else{
-            sec_led -= 2;
-            if(sec_led <= 0)
-                col = true;
-        }
-        
-        
-        if(up){
-            singleLed.colour.red++;
-            onLED.colour.red++;
-            
-            if(singleLed.colour.red >= 255)
-                up = false;
-            
-        }else{
-            singleLed.colour.red--;
-            onLED.colour.red--;
-            
-            if(singleLed.colour.red <= 0)
-                up = true;
-        }*/
-    
+        //led_fadingRainbow( false );
+        led_swirlyColours( false );
+        //led_setStrip( );
+
         /* Form the buffer */
         led_formTxBuffer( pLEDArray, pLEDPWMArray, LED_NUM );
-        //LED_PWMBuffer[LED_PWM_BUFFER_LEN-1] = PWM_PERIOD_CYCLES;
         
         /* Wait for verification that ledArray is valid */
         //xSemaphoreTake( LEDSemaphore, portMAX_DELAY );

@@ -14,6 +14,10 @@
 /*                          LOCAL DEPENDENCIES                          */
 /*======================================================================*/
 #include "config_sw.h"
+#include "adc_cfg.h"
+#include "adc.h"
+#include "adc_callback.h"
+#include "extint.h"
 
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */
@@ -21,8 +25,14 @@
 void config_configureInputs( void );
 void config_configureOutputs( void );
 
+void config_SWTriggered( void );
+void config_configureEXTINTCallbacks( void );
+void config_configureEXTINTChannel( void );
+
+static bool button = false;
+
 /*======================================================================*/
-/*                          FUNCTION DECLARATIONS                         */
+/*                          FUNCTION DECLARATIONS                       */
 /*======================================================================*/
 void CONFIG_configurePins( void )
 {
@@ -43,6 +53,32 @@ void CONFIG_configureWDT( void )
     wdt_set_config( &conf_wdt );
 }
 
+void config_SWTriggered( void )
+{
+    adc_read_buffer_job(&sw_adc, &adc_buffer, 1);
+    button = true;
+}
+
+void config_configureEXTINTChannel( void )
+{
+    struct extint_chan_conf config_extint_chan;
+    
+    config_extint_chan.gpio_pin             = SW0_PIN;
+    config_extint_chan.gpio_pin_mux         = SW0_EIC_MUX;
+    config_extint_chan.gpio_pin_pull        = EXTINT_PULL_UP;
+    config_extint_chan.detection_criteria   = EXTINT_DETECT_RISING;
+    extint_chan_set_config( SW0_EIC_LINE, &config_extint_chan );    
+}
+
+void config_configureEXTINTCallbacks( void )
+{
+    extint_register_callback(       config_SWTriggered, SW0_EIC_LINE, 
+                                    EXTINT_CALLBACK_TYPE_DETECT );
+                                
+    extint_chan_enable_callback(    SW0_EIC_LINE, 
+                                    EXTINT_CALLBACK_TYPE_DETECT );
+}
+
 void config_configureInputs( void )
 {
     struct port_config inputConfig;
@@ -51,7 +87,8 @@ void config_configureInputs( void )
     inputConfig.direction = PORT_PIN_DIR_INPUT;
     
     port_pin_set_config(SW0_PIN, &inputConfig);
-
+    config_configureEXTINTChannel();
+    config_configureEXTINTCallbacks();
 }
 
 void config_configureOutputs( void )

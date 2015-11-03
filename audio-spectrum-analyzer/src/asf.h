@@ -73,6 +73,10 @@
 // From module: Delay routines
 #include <delay.h>
 
+// From module: EXTINT - External Interrupt (Callback APIs)
+#include <extint.h>
+#include <extint_callback.h>
+
 // From module: FreeRTOS - kernel 8.0.1
 #include <FreeRTOS.h>
 #include <StackMacros.h>

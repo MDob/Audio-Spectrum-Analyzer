@@ -39,7 +39,7 @@
 #define LED_PWM_BUFFER_LEN      (LED_NUM * 24) + LED_BUFF_PADDING
 
 #define FTDI_RX_BUFFER_LEN      1
-#define FTDI_TX_BUFFER_LEN      32
+#define FTDI_TX_BUFFER_LEN      64
 #define BLUETOOTH_BUFFER_LEN    4
 
 /*======================================================================*/
