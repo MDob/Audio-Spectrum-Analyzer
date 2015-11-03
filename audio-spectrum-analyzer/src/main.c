@@ -107,6 +107,7 @@ static void setupHardware( void )
     
     /* Comms Initialization */
     //SPI_configureLED();
+    COMM_init();
     USART_init();
     PWM_init();
     ADC_init();
@@ -134,8 +135,9 @@ static void setupTasks( void )
     xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );
     
     /* FTDI Tasks */
-    xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   2,  NULL );
+    xTaskCreate(    TASK_ReadFTDI,          ( const char* ) "ECHO",         100,    NULL,   1,  NULL );
     xTaskCreate(    TASK_ftdiParser,        ( const char* ) "FTDI",         100,    NULL,   1,  NULL );
+    xTaskCreate(    TASK_mainParser,        ( const char* ) "PARSE",        100,    NULL,   1,  NULL );
     
     /* Bluetooth Tasks */
     //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );

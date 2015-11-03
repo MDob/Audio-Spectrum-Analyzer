@@ -28,6 +28,7 @@ enum commandType {
     MAX_COMMANDS,
 };
 
+void COMM_init( void );
 void TASK_ftdiParser( void *pvParameters );
 void TASK_bluetoothParser( void *pvParameters );
 void TASK_mainParser( void *pvParameters );

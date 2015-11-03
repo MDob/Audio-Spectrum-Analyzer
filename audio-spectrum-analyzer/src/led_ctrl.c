@@ -199,11 +199,21 @@ void TASK_outputFormingLED( void *pvParameters )
     uint8_t     *pLEDArray       = ledArray;    
     uint8_t     *pLEDPWMArray   = LED_PWMBuffer;
     
+    /* Default setting */
+    LED_Data_t rxRGB;
+    rxRGB.colour.red = 0;
+    rxRGB.colour.green = 0;
+    rxRGB.colour.blue = 127;
+    
     for(;;)
     {
         //led_fadingRainbow( false );
-        led_swirlyColours( false );
-        //led_setStrip( );
+        //led_swirlyColours( false );
+        led_setStrip( &rxRGB );
+        if( xLEDQueue != 0 )
+        {
+            xQueueReceive( xLEDQueue, &rxRGB, 0 );
+        }
 
         /* Form the buffer */
         led_formTxBuffer( pLEDArray, pLEDPWMArray, LED_NUM );

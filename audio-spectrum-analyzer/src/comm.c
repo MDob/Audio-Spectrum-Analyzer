@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "usart_cfg.h"
+#include "led_cfg.h"
 
 QueueHandle_t xParserQueue;
 
@@ -46,6 +47,15 @@ int compare_string( const void *pvString1, const void *pvString2 )
     char* const *pString2 = pvString2;
     
     return( strcmp( *pString1, *pString2 ) );
+}
+
+void COMM_init( void )
+{
+    xParserQueue = xQueueCreate( PARSER_MAX_CMD_LEN, PARSER_MAX_CMD_LEN * sizeof( char ) );
+    Assert( xParserQueue );
+    
+    xLEDQueue = xQueueCreate( 1, sizeof( LED_Data_t ) );
+    Assert( xLEDQueue );
 }
 
 void TASK_ftdiParser( void *pvParameters )
@@ -83,7 +93,10 @@ void TASK_ftdiParser( void *pvParameters )
                     strncpy(parserCmd, rxBuffer,  sizeof( parserCmd ) );
                 
                     /* Pass command to the main parser */
-                    //xQueueSend( xParserQueue, parserCmd, ( TickType_t ) 10 );
+                    if( xParserQueue != 0 )
+                    {
+                        xQueueSend( xParserQueue, parserCmd, ( TickType_t ) 10 );
+                    }
                     rx = rxBuffer;
                     vTaskDelay(50);
                 }
@@ -132,10 +145,34 @@ void TASK_mainParser( void *pvParameters )
         "set",
     };
     
-    xParserQueue = xQueueCreate( PARSER_MAX_CMD_LEN, PARSER_MAX_CMD_LEN * sizeof( char ) );
+    char buffer[PARSER_MAX_CMD_LEN];
+    char *cmd;
+    
+    LED_Data_t rgb;
     
     for(;;)
     {
-        
+        if( xParserQueue != 0 )
+        {
+            if( xQueueReceive( xParserQueue, buffer, ( TickType_t ) 10 ) )
+            {
+                cmd = strtok(buffer, " ");
+                if( !strcmp( cmd, "rgb" ) )
+                {
+                    cmd = strtok(NULL, " ");
+                    if(cmd)
+                        rgb.colour.red = atoi(cmd);
+                    cmd = strtok(NULL, " ");
+                    if(cmd)
+                        rgb.colour.green = atoi(cmd);
+                    cmd = strtok(NULL, " ");
+                    if(cmd)
+                        rgb.colour.blue = atoi(cmd);
+                    
+                    xQueueSend( xLEDQueue, &rgb, 0 );
+                }
+            }
+        }
+        taskYIELD();
     }
 }
