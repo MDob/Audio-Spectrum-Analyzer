@@ -95,8 +95,8 @@ uint32_t    LED_TxBuffer[LED_TX_BUFFER_LEN];
 uint8_t     LED_RxBuffer[LED_RX_BUFFER_LEN];
 #endif
 
-uint16_t    FTDI_TxBuffer[FTDI_TX_BUFFER_LEN];
-uint16_t    FTDI_RxBuffer[FTDI_RX_BUFFER_LEN];
+uint8_t    FTDI_TxBuffer[FTDI_TX_BUFFER_LEN];
+uint8_t    FTDI_RxBuffer[FTDI_RX_BUFFER_LEN];
 
 uint16_t    Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
 uint16_t    Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];

@@ -149,11 +149,11 @@ void DMA_configureFTDI( void )
     /* Setup DMA Tx/Rx descriptors */
     dma_setupDescriptor(    &DMA_TxFTDIDescriptor, txSourceAddress,
                             txDestinationAddress, FTDI_TX_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD, true, false );
+                            DMA_BEAT_SIZE_BYTE, true, false );
                             
     dma_setupDescriptor(    &DMA_RxFTDIDescriptor, rxSourceAddress,
                             rxDestinationAddress, FTDI_RX_BUFFER_LEN,
-                            DMA_BEAT_SIZE_HWORD, false, true );
+                            DMA_BEAT_SIZE_BYTE, false, true );
 
     /* Add DMA Tx/Rx descriptors to DMA Tx/Rx resources */
     dma_add_descriptor( &zDMA_FTDIResourceTx, &DMA_TxFTDIDescriptor );

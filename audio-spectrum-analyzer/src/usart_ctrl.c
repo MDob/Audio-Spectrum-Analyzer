@@ -22,9 +22,11 @@
 /*======================================================================*/
 /*                         FUNCTION DECLARATIONS                        */
 /*======================================================================*/
-void TASK_ReadFTDI( void *pvParameters )
+void TASK_FTDI( void *pvParameters )
 {
     UNUSED( pvParameters );
+    
+    char Tx[FTDI_TX_BUFFER_LEN];
     
     /* Create a semaphore */
     rxSemaphoreFTDI = xSemaphoreCreateBinary();
@@ -33,39 +35,40 @@ void TASK_ReadFTDI( void *pvParameters )
     Assert( rxSemaphoreFTDI );
     
     /* Create a queue */
-    xFTDIQueue = xQueueCreate( FTDI_MAX_RX_LEN, sizeof( uint16_t ) );
+    xFTDITxQueue = xQueueCreate( 3, FTDI_TX_BUFFER_LEN * sizeof( char ) );
+    xFTDIRxQueue = xQueueCreate( FTDI_MAX_RX_LEN, sizeof( uint16_t ) );
     
     /* Ensure that the queue is valid */
-    Assert( xFTDIQueue );
-    
+    Assert( xFTDITxQueue );
+    Assert( xFTDIRxQueue );
+
     /* Start reading */
     dma_start_transfer_job( &zDMA_FTDIResourceRx );
 
     for(;;)
     {
-        /* Block task until DMA read complete */
-        if( xSemaphoreTake( rxSemaphoreFTDI, portMAX_DELAY ) == pdTRUE )
+        if( xQueueReceive( xFTDITxQueue, Tx, ( TickType_t ) 0 ) == pdTRUE )
         {
-            /* Copy reception buffer to transmission buffer */
-            memset( FTDI_TxBuffer, 0x00, sizeof(FTDI_TxBuffer));
-            memcpy( FTDI_TxBuffer, (const uint8_t* ) FTDI_RxBuffer, sizeof( FTDI_RxBuffer ) );
-            
-            /* Send the buffer using DMA */
-            dma_start_transfer_job( &zDMA_FTDIResourceTx );
-            xQueueSend( xFTDIQueue, FTDI_RxBuffer, ( TickType_t ) 5 );
-            while( !(*pDMA_Status & _LS(FTDI_TX_DONE)));
-            
-            *pDMA_Status &= ~_LS(FTDI_TX_DONE);
-            
-            /* Keep reading */
-            dma_start_transfer_job( &zDMA_FTDIResourceRx );
-        }
-        else
-        {
-            /* Yield to oncoming traffic */
-            taskYIELD();
+            strncpy((char *)FTDI_TxBuffer, Tx, sizeof(FTDI_TxBuffer));
+            dma_start_transfer_job(&zDMA_FTDIResourceTx);
+            while( !( *pDMA_Status & _LS(FTDI_TX_DONE) ) )
+            {
+                taskYIELD();
+            }
+             *pDMA_Status &= !(_LS(FTDI_TX_DONE));
         }
         
+        /* Block task until DMA read complete */
+        if( xSemaphoreTake( rxSemaphoreFTDI, 5 ) == pdTRUE )
+        {
+            if( xFTDITxQueue != 0)
+            {
+                xQueueSend( xFTDITxQueue, FTDI_RxBuffer, ( TickType_t ) 0 );
+            }            
+            xQueueSend( xFTDIRxQueue, FTDI_RxBuffer, ( TickType_t ) 0 );
+            dma_start_transfer_job( &zDMA_FTDIResourceRx );
+        }
+
         taskYIELD();
     }
 }

@@ -24,6 +24,7 @@ void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_
 void led_fadingRainbow( bool reset );
 void led_swirlyColours( bool reset );
 void led_setStrip( LED_Data_t* strip );
+void led_blink( LED_Data_t *strip, uint32_t milliseconds );
 
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
@@ -190,6 +191,26 @@ void led_setStrip( LED_Data_t* strip )
     {
         LED_setLED( strip, i );
     }
+}
+
+void led_blink( LED_Data_t *strip, uint32_t milliseconds )
+{
+    static bool on = true;
+    LED_Data_t led;
+    led.colour.red = 0;
+    led.colour.green = 0;
+    led.colour.blue = 0;
+    
+    if( on )
+    {
+        led_setStrip(strip);
+        on = false;
+    } else {
+        led_setStrip(&led);
+        on = true;
+    }
+    
+    vTaskDelay(milliseconds);
 }
 
 void TASK_outputFormingLED( void *pvParameters )

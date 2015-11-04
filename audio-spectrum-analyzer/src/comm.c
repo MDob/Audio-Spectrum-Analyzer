@@ -19,6 +19,128 @@
 QueueHandle_t xParserQueue;
 
 int compare_string( const void *pvString1, const void *pvString2 );
+void shellProcessChar( const unsigned char currentChar );
+void shellReset( void );
+void shellErr( void );
+
+enum shellTokens {
+    LITERAL = 0,
+    WHITESPACE,
+    MINUS,
+    LINEEND,
+    TOKEN_LENGTH
+};
+
+enum shellStates {
+    ARGUMENT,
+    ARGUMENT_MINUS,
+    STATES_LENGTH
+};
+
+enum shellActions {
+    NOTHING,
+    NEXT_ARG,
+    NEXT_CHAR,
+    CALL,
+    ACTIONS_LENGTH
+};
+
+const unsigned char charMap[128] = {
+    ['-']   = MINUS,
+    [' ']   = WHITESPACE,
+    ['\t']  = WHITESPACE,
+    ['\r']  = LINEEND,
+    ['\n']  = LINEEND,
+    ['\0']  = LINEEND,
+    ['\4']  = LINEEND
+};
+
+const unsigned char shellTransitions[STATES_LENGTH][TOKEN_LENGTH][2] = {
+    [ARGUMENT] = {
+        [LITERAL]       = {ARGUMENT, NEXT_CHAR},
+        [WHITESPACE]    = {ARGUMENT, NEXT_ARG},
+        [MINUS]         = {ARGUMENT_MINUS, NOTHING},
+        [LINEEND]       = {ARGUMENT, CALL},
+    },
+    [ARGUMENT_MINUS] = {
+        [LITERAL]       = {ARGUMENT, NEXT_CHAR},
+        [WHITESPACE]    = {ARGUMENT, NEXT_CHAR},
+        [MINUS]         = {ARGUMENT, NEXT_CHAR},
+        [LINEEND]       = {ARGUMENT, NEXT_CHAR},
+    },
+};
+
+unsigned char argv[PARSER_MAX_ARG][PARSER_MAX_ARG_LEN] = {{0}};
+uint8_t argc = 1;
+bool newCmd = false;
+enum shellStates State = ARGUMENT;
+uint8_t argIdx = 0;
+
+void shellProcessChar( const unsigned char currentChar )
+{
+    const unsigned char *transition = shellTransitions[State][charMap[currentChar]];
+    State = ( enum shellStates )( transition[0] );
+    enum shellActions action = ( enum shellActions )( transition[1] );
+    
+    if( (currentChar >= 0 ) && (currentChar <= 127) )
+    {
+        switch( action )
+        {
+            case NEXT_CHAR:
+            {
+                if( argIdx < PARSER_MAX_ARG_LEN )
+                {
+                    argv[argc - 1][argIdx++] = currentChar;
+                } else {
+                    shellErr();
+                }
+                break;
+            }            
+            case NEXT_ARG:
+            {
+                if( argc < PARSER_MAX_ARG )
+                {
+                    argc++;
+                    argIdx = 0;
+                } else {
+                    shellErr();
+                }
+                break;
+            }            
+            case CALL:
+            {
+                newCmd = true;
+                break;
+            }
+            default:
+            {
+                break;
+            }            
+        }
+    } else {
+        shellErr();
+    }
+}
+
+void shellReset( void )
+{
+    State = ARGUMENT;
+    
+    argc = 1;
+    argIdx = 0;
+    
+    memset(argv, '\0', ( PARSER_MAX_ARG * PARSER_MAX_ARG_LEN ) );
+    
+    newCmd = false;
+}
+
+void shellErr( void )
+{
+    shellReset();
+    
+    /* Respond over USART */
+}
+
 //const uint8_t header[] = "\t#---------------------------------------------------------------#\r\n";
 
 //void ftdi_generateInitialMenu( void )
@@ -67,10 +189,10 @@ void TASK_ftdiParser( void *pvParameters )
     
     for(;;)
     {
-        if( xFTDIQueue != 0 )        
+        if( xFTDIRxQueue != 0 )        
         {
             /* Continuously read incoming buffer waiting for newline while echoing incoming data */
-            if( xQueueReceive( xFTDIQueue, &rxByte, ( TickType_t ) 10 ) )
+            if( xQueueReceive( xFTDIRxQueue, &rxByte, ( TickType_t ) 10 ) )
             {
                 /* Look for backspace character */
                 if( rxByte == 127 )
@@ -136,19 +258,10 @@ void TASK_bluetoothParser( void *pvParameters )
 
 void TASK_mainParser( void *pvParameters )
 {
-    const char *command[] =
-    {
-        "inp",
-        "out",
-        "ptrn",
-        "rgb",
-        "set",
-    };
-    
     char buffer[PARSER_MAX_CMD_LEN];
-    char *cmd;
-    
-    LED_Data_t rgb;
+    char *pBuffer = buffer;
+
+    LED_Data_t rgbSet;
     
     for(;;)
     {
@@ -156,20 +269,57 @@ void TASK_mainParser( void *pvParameters )
         {
             if( xQueueReceive( xParserQueue, buffer, ( TickType_t ) 10 ) )
             {
-                cmd = strtok(buffer, " ");
-                if( !strcmp( cmd, "rgb" ) )
+                while( ( !newCmd ) && ( pBuffer != &buffer[PARSER_MAX_CMD_LEN] ) )
                 {
-                    cmd = strtok(NULL, " ");
-                    if(cmd)
-                        rgb.colour.red = atoi(cmd);
-                    cmd = strtok(NULL, " ");
-                    if(cmd)
-                        rgb.colour.green = atoi(cmd);
-                    cmd = strtok(NULL, " ");
-                    if(cmd)
-                        rgb.colour.blue = atoi(cmd);
-                    
-                    xQueueSend( xLEDQueue, &rgb, 0 );
+                    shellProcessChar( *pBuffer );
+                    pBuffer++;
+                }
+                pBuffer = buffer;
+                
+                if( newCmd )
+                {
+                    /* Process Command */
+                    uint32_t id = IDENTIFIER(argv[0][0], argv[0][1], argv[0][2], argv[0][3]);
+                    switch(id)
+                    {
+                        case CMD_RGB:
+                        {
+                            rgbSet.colour.red     = atoi( (const char*) argv[1]);
+                            rgbSet.colour.green   = atoi( (const char*) argv[2]);
+                            rgbSet.colour.blue    = atoi( (const char*) argv[3]);
+                            
+                            xQueueSend( xFTDITxQueue, "\r\nLED Colour Set!\r\n", (TickType_t) 5 );
+                            xQueueSend( xLEDQueue, &rgbSet, (TickType_t) 0 );
+                            
+                            break;
+                        }
+                        case CMD_PTRN:
+                        {
+                            break;
+                        }
+                        case CMD_INP:
+                        {
+                            break;
+                        }
+                        case CMD_OUT:
+                        {
+                            break;
+                        }
+                        case CMD_SET:
+                        {
+                            break;
+                        }
+                        case CMD_CURR:
+                        {
+                            break;
+                        }
+                        case CMD_BLNK:
+                        {
+                            break;
+                        }
+                        
+                    }
+                    shellReset();
                 }
             }
         }

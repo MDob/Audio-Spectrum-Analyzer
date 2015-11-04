@@ -47,11 +47,11 @@ struct usart_module usart_instanceFTDI;
 uint8_t rx_bufferFTDI[MAX_CALLBACK_BUFFER_LEN];
 uint8_t rx_bufferBluetooth[MAX_CALLBACK_BUFFER_LEN];
 
-SemaphoreHandle_t rxSemaphoreFTDI;
-SemaphoreHandle_t rxSemaphoreBluetooth;
+SemaphoreHandle_t txSemaphoreFTDI, rxSemaphoreFTDI;
+SemaphoreHandle_t txSemaphoreBluetooth, rxSemaphoreBluetooth;
 
-QueueHandle_t xFTDIQueue;
-QueueHandle_t xBTQueue;
+QueueHandle_t xFTDITxQueue, xFTDIRxQueue;
+QueueHandle_t xBTTxQueue, xBTRxQueue;
 
 /*======================================================================*/
 /*                      EXTERNAL FUNCTION PROTOTYPES                    */
@@ -62,7 +62,8 @@ void usart_txCallbackFTDI( struct usart_module *const usart_module );
 void usart_rxCallbackBluetooth( struct usart_module *const usart_module );
 void usart_txCallbackBluetooth( struct usart_module *const usart_module );
 
-void TASK_ReadFTDI      ( void *pvParameters );
+void TASK_sendFTDI      ( void *pvParameters );
+void TASK_FTDI      ( void *pvParameters );
 void TASK_ReadBluetooth ( void *pvParameters );
 
 /*======================================================================*/

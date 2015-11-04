@@ -75,13 +75,7 @@ void dma_FTDIRxDone( struct dma_resource* const resource )
     xHigherPriorityTaskWoken = pdFALSE;
     
     /* Unblock parsing task */
-    xSemaphoreGiveFromISR( rxSemaphoreFTDI, &xHigherPriorityTaskWoken );
-    
-    //if( xHigherPriorityTaskWoken == pdTRUE )
-    //{
-    //    dma_start_transfer_job( &zDMA_FTDIResourceRx );
-    //}
-    
+    xSemaphoreGiveFromISR( rxSemaphoreFTDI, &xHigherPriorityTaskWoken );    
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
