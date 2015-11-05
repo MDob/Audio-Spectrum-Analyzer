@@ -37,6 +37,7 @@
 #define CMD_SET     IDENTIFIER('s','e','t', 0 )
 #define CMD_CURR    IDENTIFIER('c','u','r','r')
 #define CMD_BLNK    IDENTIFIER('b','l','n','k')
+#define CMD_HELP    IDENTIFIER('h','e','l','p')
 
 void COMM_init( void );
 void TASK_ftdiParser( void *pvParameters );

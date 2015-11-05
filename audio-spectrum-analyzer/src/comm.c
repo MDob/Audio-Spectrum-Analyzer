@@ -136,6 +136,7 @@ void shellReset( void )
 
 void shellErr( void )
 {
+    xQueueSend( xFTDITxQueue, "\r\nYa done fucked\r\nFix your shit.\r\n", (TickType_t) 5 );
     shellReset();
     
     /* Respond over USART */
@@ -176,7 +177,7 @@ void COMM_init( void )
     xParserQueue = xQueueCreate( PARSER_MAX_CMD_LEN, PARSER_MAX_CMD_LEN * sizeof( char ) );
     Assert( xParserQueue );
     
-    xLEDQueue = xQueueCreate( 1, sizeof( LED_Data_t ) );
+    xLEDQueue = xQueueCreate( 3, sizeof( LED_Packet_t ) );
     Assert( xLEDQueue );
 }
 
@@ -261,7 +262,7 @@ void TASK_mainParser( void *pvParameters )
     char buffer[PARSER_MAX_CMD_LEN];
     char *pBuffer = buffer;
 
-    LED_Data_t rgbSet;
+    LED_Packet_t ledPacket;
     
     for(;;)
     {
@@ -284,17 +285,22 @@ void TASK_mainParser( void *pvParameters )
                     {
                         case CMD_RGB:
                         {
-                            rgbSet.colour.red     = atoi( (const char*) argv[1]);
-                            rgbSet.colour.green   = atoi( (const char*) argv[2]);
-                            rgbSet.colour.blue    = atoi( (const char*) argv[3]);
+                            ledPacket.cmd   = RGB;
+                            ledPacket.LED.colour.red   = atoi( (const char*) argv[1]);
+                            ledPacket.LED.colour.green = atoi( (const char*) argv[2]);
+                            ledPacket.LED.colour.blue  = atoi( (const char*) argv[3]);
                             
-                            xQueueSend( xFTDITxQueue, "\r\nLED Colour Set!\r\n", (TickType_t) 5 );
-                            xQueueSend( xLEDQueue, &rgbSet, (TickType_t) 0 );
-                            
+                            xQueueSend( xFTDITxQueue, "\r\nColour Set!\r\n", (TickType_t) 5 );
+                            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
                         case CMD_PTRN:
                         {
+                            ledPacket.cmd = PTRN;
+                            ledPacket.pattern = atoi( (const char*) argv[1] );
+                            
+                            xQueueSend( xFTDITxQueue, "\r\nPattern Set!\r\n", (TickType_t) 5 );
+                            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
                         case CMD_INP:
@@ -315,8 +321,23 @@ void TASK_mainParser( void *pvParameters )
                         }
                         case CMD_BLNK:
                         {
+                            ledPacket.cmd       = BLNK;
+                            ledPacket.period    = atoi( (const char*) argv[1]);
+                            xQueueSend( xFTDITxQueue, "\r\nBlink Period Set!\r\n", (TickType_t) 5 );
+                            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
+                        case CMD_HELP:
+                        {
+                            xQueueSend( xFTDITxQueue, "\r\nCommand list: rgb, blnk, ptrn\r\n", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "rgb usage: \'rgb R G B\' (0-255)\r\n", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "blnk usage: \'blnk #\' (20-9999 ms)\r\n", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-1)\r\n", portMAX_DELAY );
+                            break;
+                        }
+                        default:
+                            shellErr();
+                            break;
                         
                     }
                     shellReset();

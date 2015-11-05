@@ -37,10 +37,29 @@
 #define SPI_BITS_PER_LED    LED_BITS_PER_BIT * LED_BITS_PER_LED
 
 #define BYTES_PER_LED       3
+#define WAIT_TIME_MS        20
 
 /*======================================================================*/
 /*                            TYPE DEFINITIONS                          */
 /*======================================================================*/
+typedef enum {
+    RGB,
+    PTRN,
+    INP,
+    OUT,
+    SET,
+    CURR,
+    BLNK,
+    NUM_CMD,
+}cmdType;
+
+typedef enum {
+    RAINBOW,
+    SWIRL,
+    WHOOSH,
+    NUM_PATTERN,
+}patternType;
+
 typedef union LED_Data 
 {
     uint8_t data[3];
@@ -52,6 +71,14 @@ typedef union LED_Data
     }colour;
     
 }LED_Data_t;
+
+typedef struct LED_Packet
+{
+    cmdType     cmd;
+    patternType pattern;
+    LED_Data_t  LED;
+    uint32_t    period;
+}LED_Packet_t;
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */

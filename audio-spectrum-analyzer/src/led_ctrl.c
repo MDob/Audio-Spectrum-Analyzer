@@ -196,21 +196,43 @@ void led_setStrip( LED_Data_t* strip )
 void led_blink( LED_Data_t *strip, uint32_t milliseconds )
 {
     static bool on = true;
+    static uint32_t count = 0;
+    
     LED_Data_t led;
     led.colour.red = 0;
     led.colour.green = 0;
     led.colour.blue = 0;
     
+    count++;
+    if( count > (milliseconds/WAIT_TIME_MS))
+    {
+        on = !on;
+        count = 0;
+    }
+    
     if( on )
     {
         led_setStrip(strip);
-        on = false;
     } else {
         led_setStrip(&led);
-        on = true;
     }
-    
-    vTaskDelay(milliseconds);
+}
+
+void led_pattern( patternType pattern )
+{
+    switch( pattern )
+    {
+        case WHOOSH:
+            break;
+        case RAINBOW:
+            led_fadingRainbow( false );
+            break;
+        case SWIRL:
+            led_swirlyColours( false );
+            break;
+        default:
+            break;
+    }
 }
 
 void TASK_outputFormingLED( void *pvParameters )
@@ -221,19 +243,36 @@ void TASK_outputFormingLED( void *pvParameters )
     uint8_t     *pLEDPWMArray   = LED_PWMBuffer;
     
     /* Default setting */
-    LED_Data_t rxRGB;
-    rxRGB.colour.red = 0;
-    rxRGB.colour.green = 0;
-    rxRGB.colour.blue = 127;
+    LED_Packet_t rxLED;
+    rxLED.cmd = RGB;
     
     for(;;)
     {
         //led_fadingRainbow( false );
         //led_swirlyColours( false );
-        led_setStrip( &rxRGB );
+        //led_blink( &rxRGB, 250 );
+        //led_setStrip( &rxRGB );
         if( xLEDQueue != 0 )
         {
-            xQueueReceive( xLEDQueue, &rxRGB, 0 );
+            xQueueReceive( xLEDQueue, &rxLED, 0 );
+        }
+        
+        switch( rxLED.cmd )
+        {
+            case RGB:
+                led_setStrip( &rxLED.LED );
+                break;
+            case BLNK:
+                if(rxLED.period <= 0)
+                    led_setStrip( &rxLED.LED );
+                else
+                    led_blink( &rxLED.LED, rxLED.period );
+                break;
+            case PTRN:
+                led_pattern( rxLED.pattern );
+                break;
+            default:
+                break;
         }
 
         /* Form the buffer */
@@ -254,6 +293,6 @@ void TASK_outputFormingLED( void *pvParameters )
         while( ! ( *pDMA_Status & _LS( LED_TX_DONE ) ) );
        
         /* Yield to oncoming traffic */
-        vTaskDelay(20);
+        vTaskDelay(WAIT_TIME_MS);
     }
 }
