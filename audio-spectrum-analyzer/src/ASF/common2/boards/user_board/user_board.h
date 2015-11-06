@@ -118,13 +118,22 @@ void system_board_init(void);
 
 /* ADC Definitons */
 #define ADC_MODULE  ADC
-#define AIN0_ADC_CHANNEL                0
-#define AIN0_ADC_PIN                    PIN_PA02B_ADC_AIN0
-#define AIN0_ADC_PINMUX                 PINMUX_PA02B_ADC_AIN0
 
-#define AIN1_ADC_CHANNEL                1
-#define AIN1_ADC_PIN                    PIN_PA03B_ADC_AIN1
-#define AIN1_ADC_PINMUX                 PINMUX_PA03B_ADC_AIN1
+#define MIC_ADC_CHANNEL                 0
+#define MIC_ADC_PIN                     PIN_PA02B_ADC_AIN0
+#define MIC_ADC_PULL                    SYSTEM_PINMUX_PIN_PULL_NONE
+#define MIC_ADC_PINMUX                  PINMUX_PA02B_ADC_AIN0
+#define MIC_ADC_MUXPOS                  MUX_PA02B_ADC_AIN0
+#define MIC_ADC_POS                     ADC_POSITIVE_INPUT_PIN0
+#define MIC_ADC_NEG                     ADC_NEGATIVE_INPUT_IOGND
+
+#define AUX_ADC_CHANNEL                 1
+#define AUX_ADC_PIN                     PIN_PA03B_ADC_AIN1
+#define AUX_ADC_PULL                    SYSTEM_PINMUX_PIN_PULL_NONE
+#define AUX_ADC_PINMUX                  PINMUX_PA03B_ADC_AIN1
+#define AUX_ADC_MUXPOS                  MUX_PA03B_ADC_AIN1
+#define AUX_ADC_POS                     ADC_POSITIVE_INPUT_PIN1
+#define AUX_ADC_NEG                     ADC_NEGATIVE_INPUT_IOGND
 
 #define ACCX_ADC_CHANNEL                16
 #define ACCX_ADC_PIN                    PIN_PA08B_ADC_AIN16
@@ -136,7 +145,11 @@ void system_board_init(void);
 
 #define CONF_ADC_CHANNEL                19
 #define CONF_ADC_PIN                    PIN_PA11B_ADC_AIN19
+#define CONF_ADC_PULL                   SYSTEM_PINMUX_PIN_PULL_NONE
 #define CONF_ADC_PINMUX                 PINMUX_PA11B_ADC_AIN19
+#define CONF_ADC_MUXPOS                 MUX_PA11B_ADC_AIN19
+#define CONF_ADC_POS                    ADC_POSITIVE_INPUT_PIN19
+#define CONF_ADC_NEG                    ADC_NEGATIVE_INPUT_IOGND
 
 #ifdef __cplusplus
 }

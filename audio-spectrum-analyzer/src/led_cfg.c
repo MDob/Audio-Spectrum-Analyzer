@@ -42,6 +42,11 @@
     vPortFree( LED_TxBuffer );
 }*/
 
+void LED_getLED( LED_Data_t* LED, uint16_t num )
+{
+    memcpy( LED->data, &ledArray[BYTES_PER_LED * num], sizeof( uint8_t ) * BYTES_PER_LED );
+}
+
 void LED_setLED( LED_Data_t* LED, uint16_t num )
 {
     uint8_t *pLEDArray = ledArray;

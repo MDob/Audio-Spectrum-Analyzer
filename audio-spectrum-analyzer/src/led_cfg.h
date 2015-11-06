@@ -99,10 +99,6 @@ enum colourNames{
     MAX_COLOURS
 };
 
-/*const ledColours[MAX_COLOURS][3] = {
-    {255, }
-}*/
-
 QueueHandle_t xLEDQueue;
 
 /*======================================================================*/
@@ -117,6 +113,7 @@ void TASK_outputFormingLED( void *pvParameters );
 //void LED_deallocateMemory( void );
 
 void LED_setLED( LED_Data_t* LED, uint16_t num );
+void LED_getLED( LED_Data_t* LED, uint16_t num );
 void LED_setStripUniform( LED_Data_t* colourData );
 void LED_setStripBrightnessRelative( uint8_t relativeBrightness );
 

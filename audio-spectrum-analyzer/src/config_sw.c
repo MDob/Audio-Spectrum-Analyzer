@@ -55,7 +55,14 @@ void CONFIG_configureWDT( void )
 
 void config_SWTriggered( void )
 {
-    adc_read_buffer_job(&sw_adc, &adc_buffer, 1);
+    if( extint_chan_is_detected( SW0_EIC_LINE ) || button )
+    {
+        //adc_read_buffer_job(&conf_instanceADC, &confADCBuffer, 1);
+        
+        //adc_read_buffer_job(&aux_instanceADC, &auxADCBuffer, 128);
+        
+        adc_read_buffer_job(&mic_instanceADC, &micADCBuffer, 128);
+    }
     button = true;
 }
 

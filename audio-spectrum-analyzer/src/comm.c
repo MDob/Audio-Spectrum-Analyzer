@@ -16,8 +16,6 @@
 #include "usart_cfg.h"
 #include "led_cfg.h"
 
-QueueHandle_t xParserQueue;
-
 int compare_string( const void *pvString1, const void *pvString2 );
 void shellProcessChar( const unsigned char currentChar );
 void shellReset( void );
@@ -136,33 +134,10 @@ void shellReset( void )
 
 void shellErr( void )
 {
-    xQueueSend( xFTDITxQueue, "\r\nYa done fucked\r\nFix your shit.\r\n", (TickType_t) 5 );
+    xQueueSend( xFTDITxQueue, "\r\nErroneous entry detected, please refactor your input", (TickType_t) 5 );
+    xQueueSend( xFTDITxQueue, ", please refactor your input\r\n", (TickType_t) 5 );
     shellReset();
-    
-    /* Respond over USART */
 }
-
-//const uint8_t header[] = "\t#---------------------------------------------------------------#\r\n";
-
-//void ftdi_generateInitialMenu( void )
-//{
-    // Emit header
-    /*
-    snprintf( (char*) FTDI_TxBuffer, sizeof(FTDI_TxBuffer), "%s", header );
-    dma_start_transfer_job( &zDMA_FTDIResourceTx );
-    
-    while( !( DMA_Status & _LS(FTDI_TX_DONE) ) );
-    DMA_Status &= ~_LS( FTDI_TX_DONE );
-    
-    snprintf( (char*) FTDI_TxBuffer, sizeof(FTDI_TxBuffer), "\t|\t\tAudio Analyzer - Main Menu\t\t|\r\n" );
-    dma_start_transfer_job( &zDMA_FTDIResourceTx );
-    
-    while( !( DMA_Status & _LS(FTDI_TX_DONE) ) );
-    DMA_Status &= ~_LS( FTDI_TX_DONE );
-    
-    snprintf( (char*) FTDI_TxBuffer, sizeof(FTDI_TxBuffer, "%s", header );
-    dma_start_transfer_job( &zDMA_FTDIResourceTx );*/
-//}
 
 int compare_string( const void *pvString1, const void *pvString2 )
 {
@@ -179,82 +154,6 @@ void COMM_init( void )
     
     xLEDQueue = xQueueCreate( 3, sizeof( LED_Packet_t ) );
     Assert( xLEDQueue );
-}
-
-void TASK_ftdiParser( void *pvParameters )
-{
-    static char rxBuffer[FTDI_MAX_RX_LEN];
-    static char *rx = rxBuffer;
-    
-    uint16_t rxByte;
-    
-    for(;;)
-    {
-        if( xFTDIRxQueue != 0 )        
-        {
-            /* Continuously read incoming buffer waiting for newline while echoing incoming data */
-            if( xQueueReceive( xFTDIRxQueue, &rxByte, ( TickType_t ) 10 ) )
-            {
-                /* Look for backspace character */
-                if( rxByte == 127 )
-                {
-                    if( rx == rxBuffer )
-                    {
-                        /* Do nothing */
-                    }
-                    else
-                    {
-                        rx--;
-                        *rx = 0;
-                    }
-                }
-                else if( rxByte == 13 )
-                {
-                    memcpy( rx, "\0", sizeof( char ) );
-                
-                    char parserCmd[FTDI_MAX_RX_LEN];
-                    strncpy(parserCmd, rxBuffer,  sizeof( parserCmd ) );
-                
-                    /* Pass command to the main parser */
-                    if( xParserQueue != 0 )
-                    {
-                        xQueueSend( xParserQueue, parserCmd, ( TickType_t ) 10 );
-                    }
-                    rx = rxBuffer;
-                    vTaskDelay(50);
-                }
-                else
-                {
-                    /* Copy byte into buffer */
-                    *rx = ( char ) rxByte;
-                
-                    /* Reset buffer pointer on overflow */
-                    if( rx == &rxBuffer[FTDI_MAX_RX_LEN-1] )
-                    {
-                        rx = rxBuffer;
-                    }
-                    else
-                    {
-                        rx++;
-                    }
-                }
-            }
-        }
-        vTaskDelay(5);
-    }
-}
-
-void TASK_bluetoothParser( void *pvParameters )
-{
-    
-    for(;;)
-    {
-        /* Continuously read incoming buffer waiting for end of sequence */
-        
-        /* On enter, parse the command into a command type and its arguments */
-        
-        /* Pass this to the main parser */
-    }
 }
 
 void TASK_mainParser( void *pvParameters )

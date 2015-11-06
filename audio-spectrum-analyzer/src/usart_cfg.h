@@ -37,6 +37,7 @@
 #define BAUDRATE_FTDI               9600
 
 #define MAX_CALLBACK_BUFFER_LEN     5
+#define FTDI_MAX_RX_LEN     32
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DECLARATIONS                    */
@@ -52,6 +53,7 @@ SemaphoreHandle_t txSemaphoreBluetooth, rxSemaphoreBluetooth;
 
 QueueHandle_t xFTDITxQueue, xFTDIRxQueue;
 QueueHandle_t xBTTxQueue, xBTRxQueue;
+QueueHandle_t xParserQueue;
 
 /*======================================================================*/
 /*                      EXTERNAL FUNCTION PROTOTYPES                    */

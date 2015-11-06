@@ -118,6 +118,48 @@ void led_fadingRainbow( bool reset )
     }    
 }
 
+void led_shiftStrip( bool direction )
+{
+    LED_Data_t tempLED;
+    LED_Data_t nextLED;
+    uint16_t i = 0;
+    
+    for(i = 0; i < (LED_NUM - 1); i++ )
+    {
+        if( direction )
+        {
+            if(!i)
+            {
+                LED_getLED( &tempLED, i );
+                LED_getLED( &nextLED, LED_NUM-1 );
+                LED_setLED( &nextLED, i );
+            }
+            LED_getLED( &nextLED, i+1);
+            LED_setLED( &tempLED, i+1 );
+            tempLED = nextLED;
+        }
+    }
+}
+
+void led_runningRainbow( bool reset )
+{
+    static bool set = false;
+    uint8_t count = 0;
+    
+    LED_Data_t test = {
+        .colour.red = 255,
+    };
+    
+    if(!set)
+    {
+        LED_setLED( &test, 0 );
+        set = true;
+    }
+   
+    led_shiftStrip(true);
+    
+}
+
 void led_swirlyColours( bool reset )
 {
     static uint8_t sec_led = 0;
@@ -231,6 +273,7 @@ void led_pattern( patternType pattern )
             led_swirlyColours( false );
             break;
         default:
+            led_runningRainbow( false );
             break;
     }
 }

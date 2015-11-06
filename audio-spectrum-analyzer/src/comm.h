@@ -19,7 +19,7 @@
 #include "compiler.h"
 #include "stdint.h"
 
-#define FTDI_MAX_RX_LEN     32
+
 #define BT_MAX_RX_LEN       64
 #define PARSER_MAX_CMD_LEN  32
 #define PARSER_MAX_ARG_LEN  4

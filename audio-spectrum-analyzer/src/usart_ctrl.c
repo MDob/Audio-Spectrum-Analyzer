@@ -26,6 +26,8 @@ void TASK_FTDI( void *pvParameters )
 {
     UNUSED( pvParameters );
     
+    static char rxBuffer[FTDI_MAX_RX_LEN];
+    static char *Rx = rxBuffer;
     char Tx[FTDI_TX_BUFFER_LEN];
     
     /* Create a semaphore */
@@ -65,7 +67,40 @@ void TASK_FTDI( void *pvParameters )
             {
                 xQueueSend( xFTDITxQueue, FTDI_RxBuffer, ( TickType_t ) 0 );
             }            
-            xQueueSend( xFTDIRxQueue, FTDI_RxBuffer, ( TickType_t ) 0 );
+            /* Look for backspace character */
+            if( *FTDI_RxBuffer == 127 )
+            {
+                if( Rx != rxBuffer )
+                {
+                    Rx--;
+                    *Rx = 0;
+                }
+            }
+            else if( *FTDI_RxBuffer == 13 )
+            {
+                memcpy( Rx, "\0", sizeof( char ) );
+                /* Pass command to the main parser */
+                if( xParserQueue != 0 )
+                {
+                    xQueueSend( xParserQueue, rxBuffer, ( TickType_t ) 10 );
+                }
+                Rx = rxBuffer;
+            }
+            else
+            {
+                /* Copy byte into buffer */
+                *Rx = ( char ) *FTDI_RxBuffer;
+                
+                /* Reset buffer pointer on overflow */
+                if( Rx == &rxBuffer[FTDI_MAX_RX_LEN-1] )
+                {
+                    Rx = rxBuffer;
+                }
+                else
+                {
+                    Rx++;
+                }
+            }
             dma_start_transfer_job( &zDMA_FTDIResourceRx );
         }
 

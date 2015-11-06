@@ -12,12 +12,18 @@
 #include "compiler.h"
 #include "user_board.h"
 
-#define ADC_SAMPLES 256
+#define ADC_SAMPLES 128
 
-uint16_t adc_buffer;
-struct adc_module sw_adc;
+uint16_t micADCBuffer[ADC_SAMPLES];
+//uint16_t auxADCBuffer[ADC_SAMPLES];
+uint16_t confADCBuffer;
+
+struct adc_module conf_instanceADC;
+struct adc_module mic_instanceADC;
+struct adc_module aux_instanceADC;
+struct adc_module accx_instanceADC;
+struct adc_module accy_instanceADC;
 
 void ADC_init( void );
-
 
 #endif /* ADC_CFG_H_ */

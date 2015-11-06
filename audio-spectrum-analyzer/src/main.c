@@ -136,7 +136,6 @@ static void setupTasks( void )
     
     /* FTDI Tasks */
     xTaskCreate(    TASK_FTDI,              ( const char* ) "ECHO",         100,    NULL,   1,  NULL );
-    xTaskCreate(    TASK_ftdiParser,        ( const char* ) "FTDI",         100,    NULL,   1,  NULL );
     xTaskCreate(    TASK_mainParser,        ( const char* ) "PARSE",        100,    NULL,   1,  NULL );
     
     /* Bluetooth Tasks */
