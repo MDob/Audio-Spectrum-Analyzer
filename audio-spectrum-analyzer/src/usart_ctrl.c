@@ -86,6 +86,22 @@ void TASK_FTDI( void *pvParameters )
                 }
                 Rx = rxBuffer;
             }
+            else if( !strcmp( ( const char * ) FTDI_RxBuffer, "\027[D" ) ) // Left arrow ANSI
+            {
+                /* Move pointer around */
+            }
+            else if( !strcmp( ( const char * ) FTDI_RxBuffer, "\027[C" ) ) // Right arrow ANSI
+            {
+                /* Move pointer around */
+            }
+            else if( !strcmp( ( const char * ) FTDI_RxBuffer, "\027[A" ) ) // Up arrow ANSI
+            {
+                /* Previous command */
+            }
+            else if( !strcmp( ( const char * ) FTDI_RxBuffer, "\027[B" ) ) // Down arrow ANSI
+            {
+                /* Next command, if available */
+            }
             else
             {
                 /* Copy byte into buffer */
@@ -126,9 +142,11 @@ void TASK_ReadBluetooth( void *pvParameters )
         /* Block task until DMA read complete */
         xSemaphoreTake( rxSemaphoreBluetooth, portMAX_DELAY );
         
-        /* Do something */
+        /* Parse AT commands */
         
-        /* Respond..? */
+        /* Respond with ACK/NAK */
+        
+        /* Send AT command back if necessary */
         dma_start_transfer_job( &zDMA_BluetoothResourceTx );
         
         /* Yield to oncoming traffic */

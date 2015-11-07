@@ -39,6 +39,12 @@ void adc_confCallback( struct adc_module *const module )
 
 void ADC_init( void )
 {
+    /* 
+     *  For some reason the ADC only allows one instance to be configured at once
+     *  Fix this so that multiple instances can be configured or add a task that queues
+     *  ADC requests and initializes/executes them in order
+     */
+    
     //ADC_configureConf();
     ADC_configureMic();
     //ADC_configureAux();
@@ -146,5 +152,6 @@ void ADC_configureConf( void )
 
 void ADC_configureAcc( void )
 {
-    
+    // Configure both accelerometer axes
+    // If you can't then make this a configuration function for a single axis
 }

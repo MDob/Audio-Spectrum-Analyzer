@@ -55,6 +55,8 @@ void CONFIG_configureWDT( void )
 
 void config_SWTriggered( void )
 {
+    // Find a better way to double check this
+    // Interrupt triggered on first tick for some reason...
     if( extint_chan_is_detected( SW0_EIC_LINE ) || button )
     {
         //adc_read_buffer_job(&conf_instanceADC, &confADCBuffer, 1);

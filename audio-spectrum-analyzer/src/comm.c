@@ -226,13 +226,21 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
-                        case CMD_HELP:
+                        case CMD_HELP_0:
+                        case CMD_HELP_1:
                         {
                             xQueueSend( xFTDITxQueue, "\r\nCommand list: rgb, blnk, ptrn\r\n", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "Use '/?' for command-", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "specific help", portMAX_DELAY );
+                            break;
+                        }
+                        case CMD_HELP_2:
+                        {
+                            /* Get second argument, if command return command specific info */
+                            /* e.g. '/? rgb'                                                */
                             xQueueSend( xFTDITxQueue, "rgb usage: \'rgb R G B\' (0-255)\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "blnk usage: \'blnk #\' (20-9999 ms)\r\n", portMAX_DELAY );
-                            xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-1)\r\n", portMAX_DELAY );
-                            break;
+                            xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-2)\r\n", portMAX_DELAY );
                         }
                         default:
                             shellErr();

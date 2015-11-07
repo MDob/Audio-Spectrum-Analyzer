@@ -56,7 +56,7 @@ typedef enum {
 typedef enum {
     RAINBOW,
     SWIRL,
-    WHOOSH,
+    RUNNING,
     NUM_PATTERN,
 }patternType;
 
@@ -109,12 +109,9 @@ void TASK_outputFormingLED( void *pvParameters );
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */
 /*======================================================================*/
-//void LED_allocateMemory( void );
-//void LED_deallocateMemory( void );
-
 void LED_setLED( LED_Data_t* LED, uint16_t num );
 void LED_getLED( LED_Data_t* LED, uint16_t num );
 void LED_setStripUniform( LED_Data_t* colourData );
-void LED_setStripBrightnessRelative( uint8_t relativeBrightness );
+void LED_setRelBrightness( LED_Data_t* pLED, uint16_t num, uint8_t relBrightness );
 
 #endif /* LED_CTRL_H_ */

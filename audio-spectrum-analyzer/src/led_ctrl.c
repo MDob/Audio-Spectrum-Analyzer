@@ -155,6 +155,11 @@ void led_runningRainbow( bool reset )
         LED_setLED( &test, 0 );
         set = true;
     }
+    
+    /* Setup dithered rainbow across the strip */
+    /* Dithering: 18 LEDs/colour, middle two = 255 */
+    /* Each LED decreases by 32 */
+    /* Need to figure out easy way to do relative brightness... */
    
     led_shiftStrip(true);
     
@@ -264,7 +269,8 @@ void led_pattern( patternType pattern )
 {
     switch( pattern )
     {
-        case WHOOSH:
+        case RUNNING:
+            led_runningRainbow( false );
             break;
         case RAINBOW:
             led_fadingRainbow( false );
@@ -273,7 +279,6 @@ void led_pattern( patternType pattern )
             led_swirlyColours( false );
             break;
         default:
-            led_runningRainbow( false );
             break;
     }
 }
@@ -291,10 +296,6 @@ void TASK_outputFormingLED( void *pvParameters )
     
     for(;;)
     {
-        //led_fadingRainbow( false );
-        //led_swirlyColours( false );
-        //led_blink( &rxRGB, 250 );
-        //led_setStrip( &rxRGB );
         if( xLEDQueue != 0 )
         {
             xQueueReceive( xLEDQueue, &rxLED, 0 );

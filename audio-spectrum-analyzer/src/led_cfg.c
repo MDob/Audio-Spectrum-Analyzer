@@ -28,19 +28,41 @@
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
 /*======================================================================*/
-//void LED_allocateMemory( void )
-//{
-    /* Calculate 32-bit blocks to allocate */
-    //uint32_t bytesToAllocate =  ( uint32_t ) CEILING( ( SPI_BITS_PER_LED * LED_NUM ), 32 );
-    
-    /* Allocate memory */
-    //LED_TxBuffer = ( uint32_t* ) pvPortMalloc( bytesToAllocate * sizeof(uint8_t ));
-//}
 
-/*void LED_deallocateMemory( void )
+/*  If passed a pointer to an LED instance, set the relative brightness in it.
+    Otherwise, set the LED at the point on the strip indicated by num */
+void LED_setRelBrightness( LED_Data_t* pLED, uint16_t num, uint8_t relBrightness )
 {
-    vPortFree( LED_TxBuffer );
-}*/
+    LED_Data_t LED;
+    
+    if( pLED )
+    {
+        /* Get current brightness for that LED */
+        uint16_t sumSqr =   ( pLED->data[0] * pLED->data[0] ) +
+                            ( pLED->data[1] * pLED->data[1] ) +
+                            ( pLED->data[2] * pLED->data[2] );
+                            
+        /* Find fixed-point divisor based on relBrightness */
+        
+        /* Set LED brightness */
+        
+    }
+    else
+    {
+        /* Get brightness on strip LED */
+        LED_getLED( &LED, num );
+        
+        uint16_t sumSqr =   ( LED.data[0] * LED.data[0] ) +
+                            ( LED.data[1] * LED.data[1] ) +
+                            ( LED.data[2] * LED.data[2] );
+        
+        /* Find fixed-point divisor based on relBrightness */
+        
+        /* Set brightness on the strip */
+        LED_setLED( &LED, num );
+        
+    }
+}
 
 void LED_getLED( LED_Data_t* LED, uint16_t num )
 {
@@ -65,17 +87,4 @@ void LED_setStripUniform( LED_Data_t* colourData )
         memcpy( pLEDArray, colourData->data, sizeof( uint8_t ) * BYTES_PER_LED );
         pLEDArray += sizeof( uint8_t ) * BYTES_PER_LED;
     }
-}
-
-/* WIP */
-void LED_setStripBrightnessRelative( uint8_t relativeBrightness )
-{
-    //uint8_t LED_index = 0;
-    //uint8_t maxLevel = 0;
-    
-    /* Keep running maximum */
-    
-    /* Change relative brightness of all LEDs */
-    /* Make this hella efficient */
-    
 }
