@@ -35,13 +35,14 @@
 void LED_setRelBrightness( LED_Data_t* pLED, uint16_t num, uint8_t relBrightness )
 {
     LED_Data_t LED;
+    uint16_t sumSqr;
     
     if( pLED )
     {
         /* Get current brightness for that LED */
-        uint16_t sumSqr =   ( pLED->data[0] * pLED->data[0] ) +
-                            ( pLED->data[1] * pLED->data[1] ) +
-                            ( pLED->data[2] * pLED->data[2] );
+        sumSqr =    ( pLED->data[0] * pLED->data[0] ) +
+                    ( pLED->data[1] * pLED->data[1] ) +
+                    ( pLED->data[2] * pLED->data[2] );
                             
         /* Find fixed-point divisor based on relBrightness */
         
@@ -53,9 +54,9 @@ void LED_setRelBrightness( LED_Data_t* pLED, uint16_t num, uint8_t relBrightness
         /* Get brightness on strip LED */
         LED_getLED( &LED, num );
         
-        uint16_t sumSqr =   ( LED.data[0] * LED.data[0] ) +
-                            ( LED.data[1] * LED.data[1] ) +
-                            ( LED.data[2] * LED.data[2] );
+        sumSqr =    ( LED.data[0] * LED.data[0] ) +
+                    ( LED.data[1] * LED.data[1] ) +
+                    ( LED.data[2] * LED.data[2] );
         
         /* Find fixed-point divisor based on relBrightness */
         

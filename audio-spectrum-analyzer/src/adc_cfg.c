@@ -1,27 +1,69 @@
-/*
- * adc_cfg.c
+/*************************************************************************
+ *  File Name:      adc_cfg.c
+ *  Author:         Michael Dobinson
+ *  Date Created:   2015-10-27
  *
- * Created: 2015-10-27 8:05:44 PM
- *  Author: Michael
- */ 
+ *  Brief:
+ *      Contains configuration functions for the ADC
+ *
+ *  [Compiled and tested with Atmel Studio 7]
+ *
+*************************************************************************/
 
+/*======================================================================*/
+/*                           LOCAL DEPENDENCIES                         */
+/*======================================================================*/
 #include "adc_cfg.h"
 #include "dma_cfg.h"
 #include "adc.h"
 #include "adc_callback.h"
+#include "fft.h"
+#include "task.h"
 
-void ADC_configure( void );
-void ADC_configureCallbacks( void );
+/*======================================================================*/
+/*                           FUNCTION PROTOTYPES                        */
+/*======================================================================*/
+void adc_configure( void );
+void adc_configureCallbacks( void );
 
 void adc_micCallback( struct adc_module *const module );
 void adc_auxCallback( struct adc_module *const module );
 void adc_confCallback( struct adc_module *const module );
 
-void ADC_configureMic( void );
-void ADC_configureAux( void );
-void ADC_configureConf( void );
-void ADC_configureAcc( void );
+void adc_configureMic( void );
+void adc_configureAux( void );
+void adc_configureConf( void );
+void adc_configureAcc( void );
 
+/*======================================================================*/
+/*                          FUNCTION DECLARATIONS                       */
+/*======================================================================*/
+void TASK_adcFFT( void *pvParameters )
+{
+    UNUSED(pvParameters);
+    //uint8_t *pFFTBuffer = &audioADCBuffer;
+    for(;;)
+    {
+        //fix_fftr();
+        vTaskDelay(1000);
+    }
+}
+
+void ADC_init( void )
+{
+    /* 
+     *  For some reason the ADC only allows one instance to be configured at once
+     *  Fix this so that multiple instances can be configured or add a task that queues
+     *  ADC requests and initializes/executes them in order
+     */
+    
+    //ADC_configureConf();
+    adc_configureMic();
+    //ADC_configureAux();
+    
+    
+    adc_configureCallbacks();
+}
 
 void adc_micCallback( struct adc_module *const module )
 {
@@ -38,31 +80,7 @@ void adc_confCallback( struct adc_module *const module )
     confADCBuffer = 0;
 }
 
-void TASK_fft( void *pvParameters )
-{
-    for(;;)
-    {
-        //fix_fftr();
-    }
-}
-
-void ADC_init( void )
-{
-    /* 
-     *  For some reason the ADC only allows one instance to be configured at once
-     *  Fix this so that multiple instances can be configured or add a task that queues
-     *  ADC requests and initializes/executes them in order
-     */
-    
-    //ADC_configureConf();
-    ADC_configureMic();
-    //ADC_configureAux();
-    
-    
-    ADC_configureCallbacks();
-}
-
-void ADC_configureCallbacks( void )
+void adc_configureCallbacks( void )
 {
     //adc_register_callback(&conf_instanceADC, adc_confCallback, ADC_CALLBACK_READ_BUFFER);
     //adc_enable_callback(&conf_instanceADC, ADC_CALLBACK_READ_BUFFER);
@@ -74,7 +92,7 @@ void ADC_configureCallbacks( void )
     //adc_enable_callback(&aux_instanceADC, ADC_CALLBACK_READ_BUFFER);
 }
 
-void ADC_configureMic( void )
+void adc_configureMic( void )
 {
     struct adc_config config_adc;
     struct system_pinmux_config config;
@@ -104,7 +122,7 @@ void ADC_configureMic( void )
     adc_enable( &mic_instanceADC );
 }
 
-void ADC_configureAux( void )
+void adc_configureAux( void )
 {
     struct adc_config config_adc;
     struct system_pinmux_config config;
@@ -134,7 +152,7 @@ void ADC_configureAux( void )
     adc_enable( &aux_instanceADC );
 }
 
-void ADC_configureConf( void )
+void adc_configureConf( void )
 {
     struct adc_config config_adc;
     struct system_pinmux_config config;
@@ -161,7 +179,7 @@ void ADC_configureConf( void )
     adc_enable( &conf_instanceADC );
 }
 
-void ADC_configureAcc( void )
+void adc_configureAcc( void )
 {
     // Configure both accelerometer axes
     // If you can't then make this a configuration function for a single axis

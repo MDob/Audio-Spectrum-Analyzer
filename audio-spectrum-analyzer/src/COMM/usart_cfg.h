@@ -37,7 +37,7 @@
 #define BAUDRATE_FTDI               9600
 
 #define MAX_CALLBACK_BUFFER_LEN     5
-#define FTDI_MAX_RX_LEN     32
+#define FTDI_MAX_RX_LEN             32
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DECLARATIONS                    */
@@ -64,9 +64,8 @@ void usart_txCallbackFTDI( struct usart_module *const usart_module );
 void usart_rxCallbackBluetooth( struct usart_module *const usart_module );
 void usart_txCallbackBluetooth( struct usart_module *const usart_module );
 
-void TASK_sendFTDI      ( void *pvParameters );
 void TASK_FTDI      ( void *pvParameters );
-void TASK_ReadBluetooth ( void *pvParameters );
+void TASK_Bluetooth ( void *pvParameters );
 
 /*======================================================================*/
 /*                        FUNCTION PROTOTYPES                           */

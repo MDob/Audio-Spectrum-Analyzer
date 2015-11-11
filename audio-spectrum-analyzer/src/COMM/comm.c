@@ -9,18 +9,19 @@
  *  [Compiled and tested with Atmel Studio 7]
  *
 *************************************************************************/
+
+/*======================================================================*/
+/*                           LOCAL DEPENDENCIES                         */
+/*======================================================================*/
 #include "comm.h"
 #include "string.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "usart_cfg.h"
 #include "led_cfg.h"
 
-int compare_string( const void *pvString1, const void *pvString2 );
-void shellProcessChar( const unsigned char currentChar );
-void shellReset( void );
-void shellErr( void );
-
+/*======================================================================*/
+/*                      GLOBAL CONSTANT DEFINITIONS                     */
+/*======================================================================*/
 enum shellTokens {
     LITERAL = 0,
     WHITESPACE,
@@ -68,13 +69,55 @@ const unsigned char const shellTransitions[STATES_LENGTH][TOKEN_LENGTH][2] = {
     },
 };
 
-unsigned char argv[PARSER_MAX_ARG][PARSER_MAX_ARG_LEN] = {{0}};
-uint8_t argc = 1;
-bool newCmd = false;
+/*======================================================================*/
+/*                      GLOBAL VARIABLE DEFINITIONS                     */
+/*======================================================================*/
 enum shellStates State = ARGUMENT;
-uint8_t argIdx = 0;
+unsigned char argv[PARSER_MAX_ARG][PARSER_MAX_ARG_LEN] = {{0}};
+    
+uint8_t argc    = 1;
+uint8_t argIdx  = 0;
+bool newCmd     = false;
 
-void shellProcessChar( const unsigned char currentChar )
+/*======================================================================*/
+/*                           FUNCTION PROTOTYPES                        */
+/*======================================================================*/
+int16_t comm_strCompare         ( const void *pvString1, const void *pvString2 );
+void    comm_shellProcessChar   ( const unsigned char currentChar );
+void    comm_shellReset         ( void );
+void    comm_shellErr           ( void );
+
+/*======================================================================*/
+/*                          FUNCTION DECLARATIONS                       */
+/*======================================================================*/
+void comm_shellErr( void )
+{
+    xQueueSend( xFTDITxQueue, "\r\nErroneous entry detected, please refactor your input", (TickType_t) 5 );
+    xQueueSend( xFTDITxQueue, ", please refactor your input\r\n", (TickType_t) 5 );
+    comm_shellReset();
+}
+
+int16_t comm_strCompare( const void *pvString1, const void *pvString2 )
+{
+    char* const *pString1 = pvString1;
+    char* const *pString2 = pvString2;
+    
+    return( strcmp( *pString1, *pString2 ) );
+}
+
+void comm_shellReset( void )
+{
+    State = ARGUMENT;
+    
+    argc = 1;
+    argIdx = 0;
+    
+    memset(argv, '\0', ( PARSER_MAX_ARG * PARSER_MAX_ARG_LEN ) );
+    
+    newCmd = false;
+}
+
+void comm_shellProcessChar( const unsigned char currentChar )
 {
     const unsigned char *transition = shellTransitions[State][charMap[currentChar]];
     State = ( enum shellStates )( transition[0] );
@@ -90,7 +133,7 @@ void shellProcessChar( const unsigned char currentChar )
                 {
                     argv[argc - 1][argIdx++] = currentChar;
                 } else {
-                    shellErr();
+                    comm_shellErr();
                 }
                 break;
             }            
@@ -101,7 +144,7 @@ void shellProcessChar( const unsigned char currentChar )
                     argc++;
                     argIdx = 0;
                 } else {
-                    shellErr();
+                    comm_shellErr();
                 }
                 break;
             }            
@@ -116,35 +159,8 @@ void shellProcessChar( const unsigned char currentChar )
             }            
         }
     } else {
-        shellErr();
+        comm_shellErr();
     }
-}
-
-void shellReset( void )
-{
-    State = ARGUMENT;
-    
-    argc = 1;
-    argIdx = 0;
-    
-    memset(argv, '\0', ( PARSER_MAX_ARG * PARSER_MAX_ARG_LEN ) );
-    
-    newCmd = false;
-}
-
-void shellErr( void )
-{
-    xQueueSend( xFTDITxQueue, "\r\nErroneous entry detected, please refactor your input", (TickType_t) 5 );
-    xQueueSend( xFTDITxQueue, ", please refactor your input\r\n", (TickType_t) 5 );
-    shellReset();
-}
-
-int compare_string( const void *pvString1, const void *pvString2 )
-{
-    char* const *pString1 = pvString1;
-    char* const *pString2 = pvString2;
-    
-    return( strcmp( *pString1, *pString2 ) );
 }
 
 void COMM_init( void )
@@ -171,7 +187,7 @@ void TASK_mainParser( void *pvParameters )
             {
                 while( ( !newCmd ) && ( pBuffer != &buffer[PARSER_MAX_CMD_LEN] ) )
                 {
-                    shellProcessChar( *pBuffer );
+                    comm_shellProcessChar( *pBuffer );
                     pBuffer++;
                 }
                 pBuffer = buffer;
@@ -243,11 +259,11 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-2)\r\n", portMAX_DELAY );
                         }
                         default:
-                            shellErr();
+                            comm_shellErr();
                             break;
                         
                     }
-                    shellReset();
+                    comm_shellReset();
                 }
             }
         }

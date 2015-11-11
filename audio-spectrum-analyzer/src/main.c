@@ -20,13 +20,11 @@
 /*======================================================================*/
 #include <asf.h>
 #include "config_sw.h"
-//#include "spi_cfg.h"
-#include "usart_cfg.h"
+#include "comm.h"
 #include "led_cfg.h"
 #include "dma_cfg.h"
 #include "pwm_cfg.h"
 #include "adc_cfg.h"
-#include "comm.h"
 #include "light_ws2812_cortex.h"
 
 /*======================================================================*/
@@ -39,8 +37,6 @@ void vApplicationIdleHook( void );
 void vApplicationTickHook( void );
 
 static void TASK_Heartbeat( void* pvParameters );
-
-static void setupHardware( void );
 static void setupTasks( void );
 
 
@@ -99,26 +95,6 @@ static void TASK_Heartbeat( void* pvParameters )
     }
 }
 
-static void setupHardware( void )
-{
-    /* System Configuration */
-    system_init();
-    system_interrupt_enable_global();
-    SysTick_Config(system_gclk_gen_get_hz(GCLK_GENERATOR_0));
-    
-    /* Comms Initialization */
-    //SPI_configureLED();
-    COMM_init();
-    USART_init();
-    //PWM_init();
-    ADC_init();
-    DMA_init();
-    
-    /* GPIO Initialization */
-    CONFIG_configurePins();
-    ws2812_init();
-}
-
 static void setupTasks( void )
 {
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 4 ========================*/
@@ -132,15 +108,16 @@ static void setupTasks( void )
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 1 ========================*/
     
+    /* Communications Tasks */
+    xTaskCreate(    TASK_FTDI,              ( const char* ) "FTDI",         100,    NULL,   1,  NULL );
+    xTaskCreate(    TASK_mainParser,        ( const char* ) "PARSE",        100,    NULL,   1,  NULL );
+    //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
+
     /* LED Tasks */
     xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );
     
-    /* FTDI Tasks */
-    xTaskCreate(    TASK_FTDI,              ( const char* ) "ECHO",         100,    NULL,   1,  NULL );
-    xTaskCreate(    TASK_mainParser,        ( const char* ) "PARSE",        100,    NULL,   1,  NULL );
-    
-    /* Bluetooth Tasks */
-    //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
+    /* ADC/FFT Task */
+    xTaskCreate(    TASK_adcFFT,            ( const char* ) "ADC_FFT",      100,    NULL,   1,  NULL );
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 0 ========================*/
     
@@ -151,7 +128,7 @@ static void setupTasks( void )
 int main (void)
 {
     /* Setup system and peripherals */
-    setupHardware();
+    system_init();
 
     /* Setup FreeRTOS tasks */
     setupTasks();

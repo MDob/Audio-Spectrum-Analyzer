@@ -21,9 +21,8 @@
 /*======================================================================*/
 #include "compiler.h"
 #include "user_board.h"
+#include "comm.h"
 #include "dma.h"
-//#include "spi_cfg.h"
-#include "usart_cfg.h"
 #include "led_cfg.h"
 
 /*======================================================================*/
