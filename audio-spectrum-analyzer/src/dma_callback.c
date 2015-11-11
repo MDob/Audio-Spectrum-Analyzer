@@ -33,12 +33,6 @@ void dma_LEDDone( struct dma_resource* const resource )
     DMA_Status |= _LS( LED_TX_DONE );
 }
 
-void dma_LEDTxDone( struct dma_resource* const resource )
-{
-    /* Set status flag */
-    DMA_Status |= _LS( LED_TX_DONE );
-}
-
 void dma_LEDRxDone( struct dma_resource* const resource )
 {
     static portBASE_TYPE wake_task = pdFALSE;

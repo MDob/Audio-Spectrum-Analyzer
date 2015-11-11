@@ -49,15 +49,15 @@ void PWM_setBuffer( void )
     {
         for(uint8_t green = 0; green <= 7; green++)
         {
-            LED_PWMBuffer[(i * 24) + green] = PWM_LED_ONE;
+            //LED_PWMBuffer[(i * 24) + green] = PWM_LED_ONE;
         }
         for(uint8_t red = 0; red <= 7; red++)
         {
-            LED_PWMBuffer[(i * 24) + 8 + red] = PWM_LED_ONE;
+            //LED_PWMBuffer[(i * 24) + 8 + red] = PWM_LED_ONE;
         }
         for(uint8_t blue = 0; blue <= 7; blue++)
         {
-            LED_PWMBuffer[(i * 24) + 16 + blue] = PWM_LED_ONE;
+            //LED_PWMBuffer[(i * 24) + 16 + blue] = PWM_LED_ONE;
         }
         
     }

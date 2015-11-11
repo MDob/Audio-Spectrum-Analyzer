@@ -20,6 +20,7 @@ void adc_confCallback( struct adc_module *const module );
 void ADC_configureMic( void );
 void ADC_configureAux( void );
 void ADC_configureConf( void );
+void ADC_configureAcc( void );
 
 
 void adc_micCallback( struct adc_module *const module )
@@ -78,6 +79,7 @@ void ADC_configureMic( void )
     
     system_pinmux_pin_set_config(MIC_ADC_PIN, &config);
     
+    //config_adc.resolution           = ADC_RESOLUTION_8BIT;
     config_adc.divide_result        = ADC_DIVIDE_RESULT_4;
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;
@@ -107,6 +109,7 @@ void ADC_configureAux( void )
     
     system_pinmux_pin_set_config(AUX_ADC_PIN, &config);
     
+    //config_adc.resolution           = ADC_RESOLUTION_8BIT;
     config_adc.divide_result        = ADC_DIVIDE_RESULT_4;
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;

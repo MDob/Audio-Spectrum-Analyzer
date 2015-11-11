@@ -13,7 +13,9 @@
 /*======================================================================*/
 /*                           LOCAL DEPENDENCIES                         */
 /*======================================================================*/
+#include <string.h>
 #include "led_cfg.h"
+#include "light_ws2812_cortex.h"
 #include "pwm_cfg.h"
 #include "task.h"
 
@@ -24,6 +26,10 @@ void led_formTxBuffer( uint8_t* inputArray, uint8_t* outputBuffer, uint16_t num_
 void led_fadingRainbow( bool reset );
 void led_swirlyColours( bool reset );
 void led_setStrip( LED_Data_t* strip );
+void led_shiftStrip( bool direction );
+void led_runningRainbow( bool reset );
+void led_pattern( patternType pattern );
+
 void led_blink( LED_Data_t *strip, uint32_t milliseconds );
 
 /*======================================================================*/
@@ -150,9 +156,32 @@ void led_runningRainbow( bool reset )
         .colour.red = 255,
     };
     
-    if(!set)
+    if( ( !set ) || reset)
     {
         LED_setLED( &test, 0 );
+        LED_setLED( &test, 72 );
+        test.colour.green = 125;
+        LED_setLED( &test, 12 );
+        LED_setLED( &test, 84 );
+        test.colour.red = 0;
+        test.colour.green = 255;
+        test.colour.blue = 125;
+        LED_setLED( &test, 24 );
+        LED_setLED( &test, 96 );
+        test.colour.green = 0;
+        test.colour.blue = 255;
+        LED_setLED( &test, 36 );
+        LED_setLED( &test, 108 );
+        test.colour.red = 0;
+        test.colour.green = 255;
+        test.colour.blue = 0;
+        LED_setLED( &test, 48 );
+        LED_setLED( &test, 120 );
+        test.colour.red = 125;
+        test.colour.green = 0;
+        test.colour.blue = 255;
+        LED_setLED( &test, 60 );
+        LED_setLED( &test, 131 );
         set = true;
     }
     
@@ -267,16 +296,35 @@ void led_blink( LED_Data_t *strip, uint32_t milliseconds )
 
 void led_pattern( patternType pattern )
 {
+    static uint8_t currState = 0;
     switch( pattern )
     {
         case RUNNING:
-            led_runningRainbow( false );
+            if(currState != RUNNING)
+            {
+                currState = RUNNING; 
+                led_runningRainbow( true );
+            }else{
+                led_runningRainbow( false );
+            }
             break;
         case RAINBOW:
-            led_fadingRainbow( false );
+            if(currState != RAINBOW)
+            {
+                currState = RAINBOW;
+                led_fadingRainbow( true );
+            }else{
+                led_fadingRainbow( false );
+            }
             break;
         case SWIRL:
-            led_swirlyColours( false );
+            if(currState != SWIRL)
+            {
+                currState = SWIRL;
+                led_swirlyColours( true );
+            }else{
+                led_swirlyColours( false );
+            }
             break;
         default:
             break;
@@ -287,8 +335,7 @@ void TASK_outputFormingLED( void *pvParameters )
 {
     UNUSED( pvParameters );
     
-    uint8_t     *pLEDArray       = ledArray;    
-    uint8_t     *pLEDPWMArray   = LED_PWMBuffer;
+    uint8_t     *pLEDArray       = ledArray;
     
     /* Default setting */
     LED_Packet_t rxLED;
@@ -319,23 +366,10 @@ void TASK_outputFormingLED( void *pvParameters )
                 break;
         }
 
-        /* Form the buffer */
-        led_formTxBuffer( pLEDArray, pLEDPWMArray, LED_NUM );
-        
-        /* Wait for verification that ledArray is valid */
-        //xSemaphoreTake( LEDSemaphore, portMAX_DELAY );
-        
-        //tcc_enable(&TCC_instanceLED);
-        
-        /* Continuously attempt to send the buffer using DMA */
         taskENTER_CRITICAL();
-        //dma_start_transfer_job( &zDMA_LEDResourceTx );
-        dma_start_transfer_job(&zDMA_LEDResourcePWM);
+        ws2812_sendarray(pLEDArray, LED_NUM * 3);
         taskEXIT_CRITICAL();
         
-        /* Wait until the buffer has been transmitted */
-        while( ! ( *pDMA_Status & _LS( LED_TX_DONE ) ) );
-       
         /* Yield to oncoming traffic */
         vTaskDelay(WAIT_TIME_MS);
     }

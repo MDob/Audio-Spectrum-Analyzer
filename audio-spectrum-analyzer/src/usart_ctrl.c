@@ -14,6 +14,7 @@
 /*======================================================================*/
 /*                          LOCAL DEPENDENCIES                          */
 /*======================================================================*/
+#include <string.h>
 #include "usart_cfg.h"
 #include "dma_cfg.h"
 #include "comm.h"
@@ -53,11 +54,11 @@ void TASK_FTDI( void *pvParameters )
         {
             strncpy((char *)FTDI_TxBuffer, Tx, sizeof(FTDI_TxBuffer));
             dma_start_transfer_job(&zDMA_FTDIResourceTx);
-            while( !( *pDMA_Status & _LS(FTDI_TX_DONE) ) )
+            while( !( DMA_Status & _LS(FTDI_TX_DONE) ) )
             {
                 taskYIELD();
             }
-             *pDMA_Status &= !(_LS(FTDI_TX_DONE));
+             DMA_Status &= !(_LS(FTDI_TX_DONE));
         }
         
         /* Block task until DMA read complete */

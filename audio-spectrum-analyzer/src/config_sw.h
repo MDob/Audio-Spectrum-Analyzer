@@ -22,12 +22,10 @@
 #include "user_board.h"
 #include "port.h"
 #include "pinmux.h"
-#include "wdt.h"
 
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */
 /*======================================================================*/
 void CONFIG_configurePins( void );
-void CONFIG_configureWDT( void );
 
 #endif /* CONFIG_SW_H_ */

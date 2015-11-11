@@ -34,7 +34,7 @@ void DMA_init( void )
     DMA_configureLEDSPI();
     #endif
     
-    DMA_configureLEDPWM();
+    //DMA_configureLEDPWM();
     
     /* FTDI DMA Init */
     DMA_configureFTDI();
@@ -114,25 +114,25 @@ void DMA_configureLEDSPI( void )
     #endif
 }
 
-void DMA_configureLEDPWM( void )
-{
-    uint32_t sourceAddress        = ( uint32_t )LED_PWMBuffer + sizeof( LED_PWMBuffer );
-    uint32_t destinationAddress   = ( uint32_t )( &LED_PWM_MODULE->CCB[LED_PWM_CHANNEL] );
-   
-    dma_configureResource( &zDMA_LEDResourcePWM, LED_PWM_DMAC_ID );
-    
-    dma_setupDescriptor(    &DMA_LedPWMDescriptor, sourceAddress, 
-                            destinationAddress, LED_PWM_BUFFER_LEN,
-                            DMA_BEAT_SIZE_BYTE, true, false );
-    
-    dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
-    //dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
-    
-    dma_register_callback( &zDMA_LEDResourcePWM, dma_LEDDone, DMA_CALLBACK_TRANSFER_DONE );
-    dma_enable_callback( &zDMA_LEDResourcePWM, DMA_CALLBACK_TRANSFER_DONE );
-    
-    //dma_start_transfer_job( &zDMA_LEDResourcePWM );
-}
+// void DMA_configureLEDPWM( void )
+// {
+//     uint32_t sourceAddress        = ( uint32_t )LED_PWMBuffer + sizeof( LED_PWMBuffer );
+//     uint32_t destinationAddress   = ( uint32_t )( &LED_PWM_MODULE->CCB[LED_PWM_CHANNEL] );
+//    
+//     dma_configureResource( &zDMA_LEDResourcePWM, LED_PWM_DMAC_ID );
+//     
+//     dma_setupDescriptor(    &DMA_LedPWMDescriptor, sourceAddress, 
+//                             destinationAddress, LED_PWM_BUFFER_LEN,
+//                             DMA_BEAT_SIZE_BYTE, true, false );
+//     
+//     dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
+//     //dma_add_descriptor( &zDMA_LEDResourcePWM, &DMA_LedPWMDescriptor );
+//     
+//     dma_register_callback( &zDMA_LEDResourcePWM, dma_LEDDone, DMA_CALLBACK_TRANSFER_DONE );
+//     dma_enable_callback( &zDMA_LEDResourcePWM, DMA_CALLBACK_TRANSFER_DONE );
+//     
+//     //dma_start_transfer_job( &zDMA_LEDResourcePWM );
+// }
 
 void DMA_configureFTDI( void )
 {

@@ -14,6 +14,7 @@
 /*                          LOCAL DEPENDENCIES                          */
 /*======================================================================*/
 #include "config_sw.h"
+#include "ioport.h"
 #include "adc_cfg.h"
 #include "adc.h"
 #include "adc_callback.h"
@@ -41,18 +42,6 @@ void CONFIG_configurePins( void )
     config_configureOutputs();
 }
 
-void CONFIG_configureWDT( void )
-{
-    /* Disable WDT for now, implement later */
-    struct wdt_conf conf_wdt;
-    wdt_get_config_defaults( &conf_wdt );
-
-    conf_wdt.enable = false;
-    conf_wdt.clock_source = GCLK_GENERATOR_0;
-
-    wdt_set_config( &conf_wdt );
-}
-
 void config_SWTriggered( void )
 {
     // Find a better way to double check this
@@ -63,7 +52,7 @@ void config_SWTriggered( void )
         
         //adc_read_buffer_job(&aux_instanceADC, &auxADCBuffer, 128);
         
-        adc_read_buffer_job(&mic_instanceADC, &micADCBuffer, 128);
+        adc_read_buffer_job(&mic_instanceADC, micADCBuffer, 2048);
     }
     button = true;
 }
@@ -112,4 +101,6 @@ void config_configureOutputs( void )
     
     port_pin_set_output_level(LED1_PIN, true);
     port_pin_set_output_level(LED0_PIN, false);
+    
+    ioport_set_pin_dir(PIN_PA06, IOPORT_DIR_OUTPUT);
 }

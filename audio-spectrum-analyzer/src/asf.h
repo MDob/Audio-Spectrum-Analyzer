@@ -56,9 +56,6 @@
 #include <adc.h>
 #include <adc_callback.h>
 
-// From module: CRC-32 calculation
-#include <crc32.h>
-
 // From module: Common SAM0 compiler driver
 #include <compiler.h>
 #include <status_codes.h>
@@ -145,9 +142,5 @@
 // From module: TCC - Timer Counter for Control Applications (Callback APIs)
 #include <tcc.h>
 #include <tcc_callback.h>
-
-// From module: WDT - Watchdog Timer (Callback APIs)
-#include <wdt.h>
-#include <wdt_callback.h>
 
 #endif // ASF_H

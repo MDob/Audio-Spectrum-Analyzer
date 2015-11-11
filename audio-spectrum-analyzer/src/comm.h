@@ -20,10 +20,10 @@
 #include "stdint.h"
 
 
-#define BT_MAX_RX_LEN       64
+#define BT_MAX_RX_LEN       32
 #define PARSER_MAX_CMD_LEN  32
 #define PARSER_MAX_ARG_LEN  4
-#define PARSER_MAX_ARG      10
+#define PARSER_MAX_ARG      5
 
 #define IDENTIFIER(a, b, c, d)   ( ( ( ( uint32_t ) a) << ( 3*8 ) )  + \
                                    ( ( ( uint32_t ) b) << ( 2*8 ) )  + \

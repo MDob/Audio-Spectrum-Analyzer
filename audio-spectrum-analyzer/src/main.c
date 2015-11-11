@@ -27,6 +27,7 @@
 #include "pwm_cfg.h"
 #include "adc_cfg.h"
 #include "comm.h"
+#include "light_ws2812_cortex.h"
 
 /*======================================================================*/
 /*                         FUNCTION PROTOTYPES                          */
@@ -109,13 +110,13 @@ static void setupHardware( void )
     //SPI_configureLED();
     COMM_init();
     USART_init();
-    PWM_init();
+    //PWM_init();
     ADC_init();
     DMA_init();
     
     /* GPIO Initialization */
     CONFIG_configurePins();
-    CONFIG_configureWDT();
+    ws2812_init();
 }
 
 static void setupTasks( void )
@@ -140,10 +141,6 @@ static void setupTasks( void )
     
     /* Bluetooth Tasks */
     //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
-    
-    /* SPI Tasks */
-    //xTaskCreate(    TASK_SendSPI,           ( const char* ) "SPI_TX",       100,    NULL,   1,  NULL );
-    //xTaskCreate(    TASK_ReadSPI,           ( const char* ) "SPI_RX",       100,    NULL,   1,  NULL );
 
     /*========================= FreeRTOS TASK DECLARATIONS - PRIORITY 0 ========================*/
     

@@ -43,7 +43,7 @@ enum shellActions {
     ACTIONS_LENGTH
 };
 
-const unsigned char charMap[128] = {
+const unsigned char const charMap[128] = {
     ['-']   = MINUS,
     [' ']   = WHITESPACE,
     ['\t']  = WHITESPACE,
@@ -53,7 +53,7 @@ const unsigned char charMap[128] = {
     ['\4']  = LINEEND
 };
 
-const unsigned char shellTransitions[STATES_LENGTH][TOKEN_LENGTH][2] = {
+const unsigned char const shellTransitions[STATES_LENGTH][TOKEN_LENGTH][2] = {
     [ARGUMENT] = {
         [LITERAL]       = {ARGUMENT, NEXT_CHAR},
         [WHITESPACE]    = {ARGUMENT, NEXT_ARG},
@@ -152,7 +152,7 @@ void COMM_init( void )
     xParserQueue = xQueueCreate( PARSER_MAX_CMD_LEN, PARSER_MAX_CMD_LEN * sizeof( char ) );
     Assert( xParserQueue );
     
-    xLEDQueue = xQueueCreate( 3, sizeof( LED_Packet_t ) );
+    xLEDQueue = xQueueCreate( 2, sizeof( LED_Packet_t ) );
     Assert( xLEDQueue );
 }
 

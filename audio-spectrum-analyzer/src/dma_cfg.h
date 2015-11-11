@@ -22,7 +22,7 @@
 #include "compiler.h"
 #include "user_board.h"
 #include "dma.h"
-#include "spi_cfg.h"
+//#include "spi_cfg.h"
 #include "usart_cfg.h"
 #include "led_cfg.h"
 
@@ -39,7 +39,7 @@
 #define LED_PWM_BUFFER_LEN      (LED_NUM * 24) + LED_BUFF_PADDING
 
 #define FTDI_RX_BUFFER_LEN      1
-#define FTDI_TX_BUFFER_LEN      64
+#define FTDI_TX_BUFFER_LEN      48
 #define BLUETOOTH_BUFFER_LEN    4
 
 /*======================================================================*/
@@ -89,6 +89,8 @@ struct dma_resource zDMA_FTDIResourceRx;
 struct dma_resource zDMA_BluetoothResourceTx;
 struct dma_resource zDMA_BluetoothResourceRx;
 
+SemaphoreHandle_t rxSemaphoreLED;
+
 /* DMA Buffers */
 #ifdef USING_SPI
 uint32_t    LED_TxBuffer[LED_TX_BUFFER_LEN];
@@ -101,12 +103,13 @@ uint8_t    FTDI_RxBuffer[FTDI_RX_BUFFER_LEN];
 uint16_t    Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
 uint16_t    Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
 
-uint8_t     LED_PWMBuffer[LED_PWM_BUFFER_LEN];
+//uint8_t     LED_PWMBuffer[LED_PWM_BUFFER_LEN];
 
 /*======================================================================*/
 /*                    EXPORTED VARIABLE DEFINITIONS                     */
 /*======================================================================*/
-extern volatile uint8_t* pDMA_Status;
+extern volatile uint8_t DMA_Status;
+extern volatile uint8_t *pDMA_Status;
 
 /*======================================================================*/
 /*                    EXTERNAL FUNCTION PROTOTYPES                      */
