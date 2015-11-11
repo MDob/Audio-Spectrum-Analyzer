@@ -800,6 +800,12 @@
     <Compile Include="src\dma_cfg.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\fft.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fft.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\led_cfg.c">
       <SubType>compile</SubType>
     </Compile>

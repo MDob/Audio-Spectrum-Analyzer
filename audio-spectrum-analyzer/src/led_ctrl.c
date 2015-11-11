@@ -32,6 +32,12 @@ void led_pattern( patternType pattern );
 
 void led_blink( LED_Data_t *strip, uint32_t milliseconds );
 
+static LED_Data_t offLED = {
+    .colour.green   = 0,
+    .colour.red     = 0,
+    .colour.blue    = 0,
+};
+
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
 /*======================================================================*/
@@ -84,37 +90,37 @@ void led_fadingRainbow( bool reset )
     switch( state )
     {
         case 0:
-            if( stripColour.colour.blue > 0 )
-                stripColour.colour.blue--;
+            if( stripColour.colour.blue >= 2 )
+                stripColour.colour.blue-=2;
         
             stripColour.colour.red++;
             if(stripColour.colour.red >= 255)
                 state = 1;
             
-            else if(stripColour.colour.red >= 127)
+            else if(stripColour.colour.red >= 200)
             stripColour.colour.green++;
 
             break;
             
         case 1:
-            if( stripColour.colour.red > 0 )
-                stripColour.colour.red--;
+            if( stripColour.colour.red >= 2 )
+                stripColour.colour.red-=2;
         
             stripColour.colour.green++;
             if(stripColour.colour.green >= 255)
                 state = 2;
                 
-            else if(stripColour.colour.green >= 127)
+            else if(stripColour.colour.green >= 200)
                 stripColour.colour.blue++;
                 
             break;
             
         case 2:
-            if( stripColour.colour.red > 0 )
-                stripColour.colour.red--;
+            if( stripColour.colour.red >= 2 )
+                stripColour.colour.red-=2;
         
-            if( stripColour.colour.green > 0 )
-                stripColour.colour.green--;
+            if( stripColour.colour.green >= 2 )
+                stripColour.colour.green-=2;
         
             stripColour.colour.blue++;
             if(stripColour.colour.blue >= 255)
@@ -149,15 +155,13 @@ void led_shiftStrip( bool direction )
 
 void led_runningRainbow( bool reset )
 {
-    static bool set = false;
-    uint8_t count = 0;
-    
-    LED_Data_t test = {
-        .colour.red = 255,
-    };
+    static bool set = false;    
+    LED_Data_t test;
     
     if( ( !set ) || reset)
     {
+        test.colour.red = 255;
+        led_setStrip(&offLED);
         LED_setLED( &test, 0 );
         LED_setLED( &test, 72 );
         test.colour.green = 125;
@@ -202,20 +206,14 @@ void led_swirlyColours( bool reset )
     static bool col = true;
     
     static LED_Data_t singleLed = {
-        .colour.green   = 45,
-        .colour.red     = 225,
+        .colour.green   = 225,
+        .colour.red     = 0,
         .colour.blue    = 25,
     };
     
-    static LED_Data_t offLED = {
-        .colour.green   = 0,
-        .colour.red     = 0,
-        .colour.blue    = 0,
-    };        
-    
     static LED_Data_t onLED = {
-        .colour.green   = 127,
-        .colour.red     = 0,
+        .colour.green   = 0,
+        .colour.red     = 127,
         .colour.blue    = 0,
     };    
 

@@ -25,11 +25,6 @@
 // NXP LPC81X
 
 #define ws2812_pin      PIN_PA06
-//#define ws2812_port_set ((uint32_t*)&LPC_GPIO_PORT->SET0)	// Address of the data port register to set the pin
-//#define ws2812_port_clr	((uint32_t*)&LPC_GPIO_PORT->CLR0)	// Address of the data port register to clear the pin
-
-//#define ws2812_port_set 0x41004418
-//#define ws2812_port_clr 0x41004414
 
 #define ws2812_mask_set  (1U << (ws2812_pin & 0x1F))	// Bitmask to set the data out pin
 #define ws2812_mask_clr  (1U << (ws2812_pin & 0x1F))		// Bitmask to clear the data out pin

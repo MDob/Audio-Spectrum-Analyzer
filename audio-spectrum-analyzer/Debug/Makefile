@@ -144,6 +144,7 @@ C_SRCS +=  \
 ../src/config_sw.c \
 ../src/dma_callback.c \
 ../src/dma_cfg.c \
+../src/fft.c \
 ../src/led_cfg.c \
 ../src/led_ctrl.c \
 ../src/light_ws2812_cortex.c \
@@ -203,6 +204,7 @@ src/comm.o \
 src/config_sw.o \
 src/dma_callback.o \
 src/dma_cfg.o \
+src/fft.o \
 src/led_cfg.o \
 src/led_ctrl.o \
 src/light_ws2812_cortex.o \
@@ -255,6 +257,7 @@ src/comm.o \
 src/config_sw.o \
 src/dma_callback.o \
 src/dma_cfg.o \
+src/fft.o \
 src/led_cfg.o \
 src/led_ctrl.o \
 src/light_ws2812_cortex.o \
@@ -307,6 +310,7 @@ src/comm.d \
 src/config_sw.d \
 src/dma_callback.d \
 src/dma_cfg.d \
+src/fft.d \
 src/led_cfg.d \
 src/led_ctrl.d \
 src/light_ws2812_cortex.d \
@@ -359,6 +363,7 @@ src/comm.d \
 src/config_sw.d \
 src/dma_callback.d \
 src/dma_cfg.d \
+src/fft.d \
 src/led_cfg.d \
 src/led_ctrl.d \
 src/light_ws2812_cortex.d \
@@ -407,6 +412,8 @@ LINKER_SCRIPT_DEP+=  \
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

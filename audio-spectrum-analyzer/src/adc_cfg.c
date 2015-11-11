@@ -38,6 +38,14 @@ void adc_confCallback( struct adc_module *const module )
     confADCBuffer = 0;
 }
 
+void TASK_fft( void *pvParameters )
+{
+    for(;;)
+    {
+        //fix_fftr();
+    }
+}
+
 void ADC_init( void )
 {
     /* 
