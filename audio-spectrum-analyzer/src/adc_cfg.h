@@ -25,13 +25,14 @@
 /*======================================================================*/
 /*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
-#define ADC_SAMPLES 1024
+#define ADC_SAMPLES     512
+#define LOG2_SAMPLES    9
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */
 /*======================================================================*/
-uint16_t audioADCBuffer[ADC_SAMPLES];
-uint16_t confADCBuffer;
+volatile int16_t audioADCBuffer[ADC_SAMPLES];
+int16_t confADCBuffer;
 
 struct adc_module conf_instanceADC;
 struct adc_module mic_instanceADC;
@@ -40,7 +41,7 @@ struct adc_module accx_instanceADC;
 struct adc_module accy_instanceADC;
 
 /*======================================================================*/
-/*                      FUNCTION PROTOTYPES                             */
+/*                         FUNCTION PROTOTYPES                          */
 /*======================================================================*/
 void ADC_init( void );
 void TASK_adcFFT( void *pvParameters );

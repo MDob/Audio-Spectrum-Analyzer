@@ -4,10 +4,12 @@
   to +32768 represent -1.0 to +1.0 respectively. Integer
   arithmetic is used for speed, instead of the more natural
   floating-point.
+
   For the forward FFT (time -> freq), fixed scaling is
   performed to prevent arithmetic overflow, and to map a 0dB
   sine/cosine wave (i.e. amplitude = 32767) to two -6dB freq
   coefficients. The return value is always 0.
+
   For the inverse FFT (freq -> time), fixed scaling cannot be
   done, as two 0dB coefficients would sum to a peak amplitude
   of 64K, overflowing the 32k range of the fixed-point integers.
@@ -20,6 +22,7 @@
   integers. In practice, if the result is to be used as a
   filter, the scale_shift can usually be ignored, as the
   result will be approximately correctly normalized as is.
+
   Written by:  Tom Roberts  11/8/89
   Made portable:  Malcolm Slaney 12/15/94 malcolm@interval.com
   Enhanced:  Dimitrios P. Bouras  14 Jun 2006 dbouras@ieee.org
@@ -34,14 +37,12 @@
   the case in your architecture, please replace "short"
   with a type definition which *is* a 16-bit word.
 */
-inline short FIX_MPY(short a, short b);
-int fix_fft(short fr[], short fi[], short m, short inverse);
-
+short FIX_MPY(short a, short b);
 /*
   Since we only use 3/4 of N_WAVE, we define only
   this many samples, in order to conserve data space.
 */
-short Sinewave[N_WAVE-N_WAVE/4] = {
+const short const Sinewave[N_WAVE-N_WAVE/4] = {
       0,    201,    402,    603,    804,   1005,   1206,   1406,
    1607,   1808,   2009,   2209,   2410,   2610,   2811,   3011,
    3211,   3411,   3611,   3811,   4011,   4210,   4409,   4608,

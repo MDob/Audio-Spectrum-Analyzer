@@ -33,7 +33,6 @@ void system_board_init(void)
     /* Peripheral Initialization */
     COMM_init();
     USART_init();
-    ADC_init();
     DMA_init();
     
     /* GPIO Initialization */

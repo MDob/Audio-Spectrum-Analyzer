@@ -14,26 +14,35 @@
 /*                           LOCAL DEPENDENCIES                         */
 /*======================================================================*/
 #include "adc_cfg.h"
-#include "dma_cfg.h"
 #include "adc.h"
+#include "dma_cfg.h"
 #include "adc_callback.h"
 #include "fft.h"
 #include "task.h"
+#include "arm_math.h"
+
+enum adcFlag {
+    AUDIO_DONE,
+    CONF_DONE,
+    ACCX_DONE,
+    ACCY_DONE,
+};
+
+uint8_t adcFlags = 0;
 
 /*======================================================================*/
 /*                           FUNCTION PROTOTYPES                        */
 /*======================================================================*/
-void adc_configure( void );
-void adc_configureCallbacks( void );
+void adc_configure          ( void );
+void adc_configureCallbacks ( void );
 
-void adc_micCallback( struct adc_module *const module );
-void adc_auxCallback( struct adc_module *const module );
-void adc_confCallback( struct adc_module *const module );
+void adc_audioCallback      ( struct adc_module *const module );
+void adc_confCallback       ( struct adc_module *const module );
 
-void adc_configureMic( void );
-void adc_configureAux( void );
-void adc_configureConf( void );
-void adc_configureAcc( void );
+void adc_configureMic       ( void );
+void adc_configureAux       ( void );
+void adc_configureConf      ( void );
+void adc_configureAcc       ( void );
 
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
@@ -41,11 +50,35 @@ void adc_configureAcc( void );
 void TASK_adcFFT( void *pvParameters )
 {
     UNUSED(pvParameters);
-    //uint8_t *pFFTBuffer = &audioADCBuffer;
+    uint16_t *buffer = audioADCBuffer;
+    uint16_t i;
+    
+    ADC_init();
+    adc_read_buffer_job( &aux_instanceADC, buffer, ADC_SAMPLES );
+    
     for(;;)
     {
-        //fix_fftr();
-        vTaskDelay(1000);
+        if( adcFlags & _LS( AUDIO_DONE ) )
+        {
+            fix_fftr( (short *) audioADCBuffer, LOG2_SAMPLES, 0 );
+            
+            for( i = 0; i < _LS( ( LOG2_SAMPLES-1 ) ); i++ )
+            {
+                audioADCBuffer[i] = sqrt( ( audioADCBuffer[i] * 
+                                            audioADCBuffer[i] ) +
+                                          ( audioADCBuffer[i + _LS( ( LOG2_SAMPLES-1 ) )] * 
+                                            audioADCBuffer[i + _LS( ( LOG2_SAMPLES-1 ) )] ) );
+            }
+            /* Do something with result */
+            
+            /* Clear it out */
+            memset( audioADCBuffer, 0x00, sizeof( audioADCBuffer ) );
+            
+            adc_read_buffer_job( &aux_instanceADC, buffer, ADC_SAMPLES );
+            adcFlags = 0;
+        }
+        
+        vTaskDelay(100);
     }
 }
 
@@ -57,27 +90,21 @@ void ADC_init( void )
      *  ADC requests and initializes/executes them in order
      */
     
-    //ADC_configureConf();
-    adc_configureMic();
-    //ADC_configureAux();
-    
+    //adc_configureConf();
+    //adc_configureMic();
+    adc_configureAux();
     
     adc_configureCallbacks();
 }
 
-void adc_micCallback( struct adc_module *const module )
+void adc_audioCallback( struct adc_module *const module )
 {
-    confADCBuffer = 0;
-}
-
-void adc_auxCallback( struct adc_module *const module )
-{
-    confADCBuffer = 0;
+    adcFlags |= _LS( AUDIO_DONE );
 }
 
 void adc_confCallback( struct adc_module *const module )
 {
-    confADCBuffer = 0;
+    adcFlags |= _LS( CONF_DONE );
 }
 
 void adc_configureCallbacks( void )
@@ -85,11 +112,11 @@ void adc_configureCallbacks( void )
     //adc_register_callback(&conf_instanceADC, adc_confCallback, ADC_CALLBACK_READ_BUFFER);
     //adc_enable_callback(&conf_instanceADC, ADC_CALLBACK_READ_BUFFER);
     
-    adc_register_callback(&mic_instanceADC, adc_micCallback, ADC_CALLBACK_READ_BUFFER);
-    adc_enable_callback(&mic_instanceADC, ADC_CALLBACK_READ_BUFFER);
+    //adc_register_callback( &mic_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER );
+    //adc_enable_callback( &mic_instanceADC, ADC_CALLBACK_READ_BUFFER );
     
-    //adc_register_callback(&aux_instanceADC, adc_auxCallback, ADC_CALLBACK_READ_BUFFER);
-    //adc_enable_callback(&aux_instanceADC, ADC_CALLBACK_READ_BUFFER);
+    adc_register_callback(&aux_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER);
+    adc_enable_callback(&aux_instanceADC, ADC_CALLBACK_READ_BUFFER);
 }
 
 void adc_configureMic( void )
@@ -97,15 +124,15 @@ void adc_configureMic( void )
     struct adc_config config_adc;
     struct system_pinmux_config config;
     
-    system_pinmux_get_config_defaults(&config);
-    adc_get_config_defaults(&config_adc);
+    system_pinmux_get_config_defaults( &config );
+    adc_get_config_defaults( &config_adc );
     
     config.input_pull               = MIC_ADC_PULL;
     config.mux_position             = MIC_ADC_MUXPOS;
     
-    system_pinmux_pin_set_config(MIC_ADC_PIN, &config);
+    system_pinmux_pin_set_config( MIC_ADC_PIN, &config );
     
-    //config_adc.resolution           = ADC_RESOLUTION_8BIT;
+    config_adc.resolution           = ADC_RESOLUTION_CUSTOM;
     config_adc.divide_result        = ADC_DIVIDE_RESULT_4;
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;
@@ -127,15 +154,15 @@ void adc_configureAux( void )
     struct adc_config config_adc;
     struct system_pinmux_config config;
     
-    system_pinmux_get_config_defaults(&config);
-    adc_get_config_defaults(&config_adc);
+    system_pinmux_get_config_defaults( &config );
+    adc_get_config_defaults( &config_adc );
     
     config.input_pull               = AUX_ADC_PULL;
     config.mux_position             = AUX_ADC_MUXPOS;
     
-    system_pinmux_pin_set_config(AUX_ADC_PIN, &config);
+    system_pinmux_pin_set_config( AUX_ADC_PIN, &config );
     
-    //config_adc.resolution           = ADC_RESOLUTION_8BIT;
+    config_adc.resolution           = ADC_RESOLUTION_CUSTOM;
     config_adc.divide_result        = ADC_DIVIDE_RESULT_4;
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;
@@ -157,13 +184,13 @@ void adc_configureConf( void )
     struct adc_config config_adc;
     struct system_pinmux_config config;
     
-    system_pinmux_get_config_defaults(&config);
-    adc_get_config_defaults(&config_adc);
+    system_pinmux_get_config_defaults( &config );
+    adc_get_config_defaults( &config_adc );
     
     config.input_pull               = CONF_ADC_PULL;
     config.mux_position             = CONF_ADC_MUXPOS;
     
-    system_pinmux_pin_set_config(CONF_ADC_PIN, &config);
+    system_pinmux_pin_set_config( CONF_ADC_PIN, &config );
     
     config_adc.resolution           = ADC_RESOLUTION_CUSTOM;
     config_adc.divide_result        = ADC_DIVIDE_RESULT_32;
