@@ -49,6 +49,7 @@
 #define CMD_SET     IDENTIFIER('s','e','t', 0 )
 #define CMD_CURR    IDENTIFIER('c','u','r','r')
 #define CMD_BLNK    IDENTIFIER('b','l','n','k')
+#define CMD_AUD     IDENTIFIER('a','u','d', 0 )
 #define CMD_HELP_0  IDENTIFIER('h','e','l','p')
 #define CMD_HELP_1  IDENTIFIER('?', 0,  0,  0 )
 #define CMD_HELP_2  IDENTIFIER('/','?', 0,  0 )

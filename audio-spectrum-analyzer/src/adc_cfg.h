@@ -25,13 +25,14 @@
 /*======================================================================*/
 /*                      GLOBAL CONSTANT DEFINITIONS                     */
 /*======================================================================*/
-#define ADC_SAMPLES     512
-#define LOG2_SAMPLES    9
+#define ADC_SAMPLES     128
+#define LOG2_SAMPLES    7
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */
 /*======================================================================*/
-volatile int16_t audioADCBuffer[ADC_SAMPLES];
+int16_t audioADCBuffer[ADC_SAMPLES];
+int16_t audioImag[ADC_SAMPLES];
 int16_t confADCBuffer;
 
 struct adc_module conf_instanceADC;

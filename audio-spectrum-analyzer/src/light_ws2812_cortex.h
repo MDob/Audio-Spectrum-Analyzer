@@ -67,7 +67,7 @@
 // Numer of bytes to be transmitted is leds*3
 ///////////////////////////////////////////////////////////////////////
 
-void ws2812_sendarray(uint8_t *ledarray,int length);
+void ws2812_sendarray(uint8_t *led_array,int length);
 void ws2812_init( void );
 
 #endif /* LIGHT_WS2812_H_ */

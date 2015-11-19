@@ -15,6 +15,7 @@
 /*======================================================================*/
 #include "adc_cfg.h"
 #include "adc.h"
+#include "led_cfg.h"
 #include "dma_cfg.h"
 #include "adc_callback.h"
 #include "fft.h"
@@ -44,14 +45,20 @@ void adc_configureAux       ( void );
 void adc_configureConf      ( void );
 void adc_configureAcc       ( void );
 
+void setBass( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
+void setMids( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
+void setTreble( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
+
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
 /*======================================================================*/
 void TASK_adcFFT( void *pvParameters )
 {
     UNUSED(pvParameters);
+    spectrumCast_t *ledSpectrum = (spectrumCast_t *)ledArray;
+    uint8_t *pLEDArray = ledArray;
     uint16_t *buffer = audioADCBuffer;
-    uint16_t i;
+    uint16_t i, j;
     
     ADC_init();
     adc_read_buffer_job( &aux_instanceADC, buffer, ADC_SAMPLES );
@@ -60,16 +67,29 @@ void TASK_adcFFT( void *pvParameters )
     {
         if( adcFlags & _LS( AUDIO_DONE ) )
         {
-            fix_fftr( (short *) audioADCBuffer, LOG2_SAMPLES, 0 );
+            j = 0;
+            memset( audioImag, 0x00, sizeof( audioImag ) );
+            fix_fft( ( short * ) audioADCBuffer, ( short * ) audioImag, LOG2_SAMPLES, !INVERSE_FFT );
             
-            for( i = 0; i < _LS( ( LOG2_SAMPLES-1 ) ); i++ )
+            for( i = 0; i < ADC_SAMPLES; i++ )
             {
-                audioADCBuffer[i] = sqrt( ( audioADCBuffer[i] * 
-                                            audioADCBuffer[i] ) +
-                                          ( audioADCBuffer[i + _LS( ( LOG2_SAMPLES-1 ) )] * 
-                                            audioADCBuffer[i + _LS( ( LOG2_SAMPLES-1 ) )] ) );
+                audioADCBuffer[i] = 3 * sqrt( ( ( long ) audioADCBuffer[i] * 
+                                                ( long ) audioADCBuffer[i] ) +
+                                              ( ( long ) audioImag[i] * 
+                                                ( long ) audioImag[i] ) );
             }
+            
             /* Do something with result */
+            if( LEDFlag & _LS(AUD) )
+            {
+                setBass( &audioADCBuffer[1], ledSpectrum->freq.bassL, 4, BASS_L_LEN, audioADCBuffer[0] );
+                setBass( &audioADCBuffer[1], ledSpectrum->freq.bassR, 4, BASS_R_LEN, audioADCBuffer[0] );
+                
+                setMids( &audioADCBuffer[5], ledSpectrum->freq.midsL, 15, MID_L_LEN, audioADCBuffer[0] );
+                setMids( &audioADCBuffer[5], ledSpectrum->freq.midsR, 15, MID_L_LEN, audioADCBuffer[0] );
+                
+                setTreble( &audioADCBuffer[20], ledSpectrum->freq.treb, 43, TREB_LEN, audioADCBuffer[0] );
+            }
             
             /* Clear it out */
             memset( audioADCBuffer, 0x00, sizeof( audioADCBuffer ) );
@@ -78,8 +98,121 @@ void TASK_adcFFT( void *pvParameters )
             adcFlags = 0;
         }
         
-        vTaskDelay(100);
+        vTaskDelay(10);
     }
+}
+
+void setBass( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
+{
+    uint16_t max = 0;
+    uint16_t maxPos = 0;
+    uint16_t avg = 0;
+    
+    for( uint16_t i = 0; i < lenFreq; i++, freq++ )
+    {
+        if( *freq > max )
+        {
+            max = *freq;
+            maxPos = i;
+        }
+        
+        avg += *freq;
+    }
+    
+    // Calculate average intensity
+    avg /= lenFreq;
+    
+    for( uint16_t i = 0; i < lenLED; i++ )
+    {
+        /* Green */
+        *LED = 0;
+        LED++;
+        
+        /* Red */
+        *LED = ((float)(*LED) * 0.8) + (float)((20 + ((255 - 20) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+        
+        /* Blue */
+        *LED = ((float)(*LED) * 0.8) + (float)((25 + ((255 - 25) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+    }
+}
+
+void setMids( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
+{
+    uint16_t max = 0;
+    uint16_t maxPos = 0;
+    uint16_t avg = 0;
+    
+    for( uint16_t i = 0; i < lenFreq; i++, freq++ )
+    {
+        if( *freq > max )
+        {
+            max = *freq;
+            maxPos = i;
+        }
+        
+        avg += *freq;
+    }
+    
+    // Calculate average intensity
+    avg /= lenFreq;
+    
+    for( uint16_t i = 0; i < lenLED; i++ )
+    {
+        /* Green */
+        *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+        
+        /* Red */
+        *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+        
+        /* Blue */
+        *LED = 0;
+        LED++;
+    }
+}
+
+void setTreble( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
+{
+    uint16_t max = 0;
+    uint16_t maxPos = 0;
+    uint16_t avg = 0;
+    
+    for( uint16_t i = 0; i < lenFreq; i++, freq++ )
+    {
+        if( *freq > max )
+        {
+            max = *freq;
+            maxPos = i;
+        }
+        
+        avg += *freq;
+    }
+    
+    // Calculate average intensity
+    avg /= lenFreq;
+    
+    for( uint16_t i = 0; i < lenLED; i++ )
+    {
+        /* Green */
+        *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+        
+        /* Red */
+        *LED = 0;
+        LED++;
+        
+        /* Blue */
+        *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
+        LED++;
+    }
+}
+
+uint8_t linearInterpolate( uint8_t y1, uint8_t y2 )
+{
+    return( ( y1 >> 1 ) + ( y2 >> 1 ) );
 }
 
 void ADC_init( void )
@@ -137,7 +270,7 @@ void adc_configureMic( void )
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;
     config_adc.gain_factor          = ADC_GAIN_FACTOR_1X;
-    config_adc.clock_prescaler      = ADC_CLOCK_PRESCALER_DIV4;
+    config_adc.clock_prescaler      = ADC_CLOCK_PRESCALER_DIV32;
     config_adc.reference            = ADC_REFERENCE_INTVCC1;
     
     config_adc.positive_input       = MIC_ADC_POS;
@@ -167,7 +300,7 @@ void adc_configureAux( void )
     config_adc.accumulate_samples   = ADC_ACCUMULATE_SAMPLES_4;
     config_adc.clock_source         = GCLK_GENERATOR_5;
     config_adc.gain_factor          = ADC_GAIN_FACTOR_1X;
-    config_adc.clock_prescaler      = ADC_CLOCK_PRESCALER_DIV4;
+    config_adc.clock_prescaler      = ADC_CLOCK_PRESCALER_DIV32;
     config_adc.reference            = ADC_REFERENCE_INTVCC1;
     
     config_adc.positive_input       = AUX_ADC_POS;

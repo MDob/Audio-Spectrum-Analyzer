@@ -298,7 +298,7 @@ void led_pattern( patternType pattern )
     switch( pattern )
     {
         case RUNNING:
-            if(currState != RUNNING)
+            if((currState != RUNNING) || !(LEDFlag & _LS(PTRN)))
             {
                 currState = RUNNING; 
                 led_runningRainbow( true );
@@ -307,7 +307,7 @@ void led_pattern( patternType pattern )
             }
             break;
         case RAINBOW:
-            if(currState != RAINBOW)
+            if(currState != RAINBOW || !(LEDFlag & _LS(PTRN)))
             {
                 currState = RAINBOW;
                 led_fadingRainbow( true );
@@ -316,7 +316,7 @@ void led_pattern( patternType pattern )
             }
             break;
         case SWIRL:
-            if(currState != SWIRL)
+            if(currState != SWIRL || !(LEDFlag & _LS(PTRN)))
             {
                 currState = SWIRL;
                 led_swirlyColours( true );
@@ -338,6 +338,7 @@ void TASK_outputFormingLED( void *pvParameters )
     /* Default setting */
     LED_Packet_t rxLED;
     rxLED.cmd = RGB;
+    LEDFlag = 0;
     
     for(;;)
     {
@@ -349,9 +350,11 @@ void TASK_outputFormingLED( void *pvParameters )
         switch( rxLED.cmd )
         {
             case RGB:
+                LEDFlag = _LS(RGB);
                 led_setStrip( &rxLED.LED );
                 break;
             case BLNK:
+                LEDFlag = _LS(BLNK);
                 if(rxLED.period <= 0)
                     led_setStrip( &rxLED.LED );
                 else
@@ -359,6 +362,10 @@ void TASK_outputFormingLED( void *pvParameters )
                 break;
             case PTRN:
                 led_pattern( rxLED.pattern );
+                LEDFlag = _LS(PTRN);
+                break;
+            case AUD:
+                LEDFlag = _LS(AUD);
                 break;
             default:
                 break;

@@ -45,6 +45,12 @@
 #define T0L 900
 #define RES 6000
 
+#define BASS_L_LEN      20
+#define BASS_R_LEN      20
+#define MID_L_LEN       36
+#define MID_R_LEN       36
+#define TREB_LEN        32
+
 /*======================================================================*/
 /*                            TYPE DEFINITIONS                          */
 /*======================================================================*/
@@ -56,6 +62,7 @@ typedef enum {
     SET,
     CURR,
     BLNK,
+    AUD,
     NUM_CMD,
 }cmdType;
 
@@ -86,6 +93,18 @@ typedef struct LED_Packet
     uint32_t    period;
 }LED_Packet_t;
 
+typedef union spectrumCast {
+    uint8_t array[MAX_LED_NUM * 3];
+    
+    struct{
+        uint8_t bassL[BASS_L_LEN * 3];
+        uint8_t midsL[MID_L_LEN * 3];
+        uint8_t treb[TREB_LEN * 3];
+        uint8_t midsR[MID_R_LEN * 3];
+        uint8_t bassR[BASS_R_LEN * 3];
+    }freq;
+}spectrumCast_t;
+
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */
 /*======================================================================*/
@@ -105,6 +124,7 @@ enum colourNames{
     MAX_COLOURS
 };
 
+uint16_t LEDFlag;
 QueueHandle_t xLEDQueue;
 
 /*======================================================================*/

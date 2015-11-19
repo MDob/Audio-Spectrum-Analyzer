@@ -242,6 +242,13 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
+                        case CMD_AUD:
+                        {
+                            ledPacket.cmd = AUD;
+                            xQueueSend( xFTDITxQueue, "\r\nAudio Reactivity On!\r\n", (TickType_t) 5 );
+                            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
+                            break;
+                        }
                         case CMD_HELP_0:
                         case CMD_HELP_1:
                         {
@@ -257,6 +264,7 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xFTDITxQueue, "rgb usage: \'rgb R G B\' (0-255)\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "blnk usage: \'blnk #\' (20-9999 ms)\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-2)\r\n", portMAX_DELAY );
+                            break;
                         }
                         default:
                             comm_shellErr();
