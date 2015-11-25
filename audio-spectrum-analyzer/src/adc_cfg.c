@@ -30,6 +30,13 @@ enum adcFlag {
 };
 
 typedef enum {
+    ADC_MIC,
+    ADC_AUX,
+    ADC_CONF,
+    NUM_ADC_CHAN
+}adcChannel_t;
+
+typedef enum {
     AUDIO_BASS,
     AUDIO_MIDS,
     AUDIO_TREBLE,
@@ -37,6 +44,7 @@ typedef enum {
 }audioType_t;
 
 uint8_t adcFlags = 0;
+adcChannel_t currChannel = ADC_AUX;
 
 /*======================================================================*/
 /*                           FUNCTION PROTOTYPES                        */
@@ -52,6 +60,11 @@ void adc_configureAux       ( void );
 void adc_configureConf      ( void );
 void adc_configureAcc       ( void );
 
+void adc_readChannel( adcChannel_t channel, uint16_t *buffer, uint16_t samples);
+void adc_setChannel( adcChannel_t channel );
+void adc_disableChannel( adcChannel_t channel );
+void adc_enableChannel( adcChannel_t channel );
+
 void setAudio( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC, audioType_t type );
 
 /*======================================================================*/
@@ -61,18 +74,18 @@ void TASK_adcFFT( void *pvParameters )
 {
     UNUSED(pvParameters);
     spectrumCast_t *ledSpectrum = (spectrumCast_t *)ledArray;
-    uint8_t *pLEDArray = ledArray;
-    uint16_t *buffer = audioADCBuffer;
-    uint16_t i, j;
+    uint16_t *buffer = (uint16_t *) audioADCBuffer;
+    uint16_t i;
     
     ADC_init();
-    adc_read_buffer_job( &aux_instanceADC, buffer, ADC_SAMPLES );
+    
+    adc_setChannel( currChannel );
+    adc_readChannel( currChannel, buffer, ADC_SAMPLES );
     
     for(;;)
     {
         if( adcFlags & _LS( AUDIO_DONE ) )
         {
-            j = 0;
             memset( audioImag, 0x00, sizeof( audioImag ) );
             fix_fft( ( short * ) audioADCBuffer, ( short * ) audioImag, LOG2_SAMPLES, !INVERSE_FFT );
             
@@ -99,7 +112,8 @@ void TASK_adcFFT( void *pvParameters )
             /* Clear it out */
             memset( audioADCBuffer, 0x00, sizeof( audioADCBuffer ) );
             
-            adc_read_buffer_job( &aux_instanceADC, buffer, ADC_SAMPLES );
+            adc_readChannel( currChannel, buffer, ADC_SAMPLES );
+            
             adcFlags = 0;
         }
         
@@ -172,27 +186,22 @@ void setAudio( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, ui
                 *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
                 LED++;
                 break;
+                
+            default:
+                /* Do nothing */
+                break;
         }
     }
 }
 
-uint8_t linearInterpolate( uint8_t y1, uint8_t y2 )
-{
-    return( ( y1 >> 1 ) + ( y2 >> 1 ) );
-}
-
 void ADC_init( void )
 {
-    /* 
-     *  For some reason the ADC only allows one instance to be configured at once
-     *  Fix this so that multiple instances can be configured or add a task that queues
-     *  ADC requests and initializes/executes them in order
-     */
-    
-    //adc_configureConf();
-    //adc_configureMic();
+    /* Configure ADC channels */
+    adc_configureConf();
+    adc_configureMic();
     adc_configureAux();
     
+    /* Configure ADC callbacks */
     adc_configureCallbacks();
 }
 
@@ -206,16 +215,94 @@ void adc_confCallback( struct adc_module *const module )
     adcFlags |= _LS( CONF_DONE );
 }
 
-void adc_configureCallbacks( void )
+void adc_readChannel( adcChannel_t channel, uint16_t *buffer, uint16_t samples)
 {
-    //adc_register_callback(&conf_instanceADC, adc_confCallback, ADC_CALLBACK_READ_BUFFER);
-    //adc_enable_callback(&conf_instanceADC, ADC_CALLBACK_READ_BUFFER);
+    switch( channel )
+    {
+        case ADC_MIC:
+            adc_read_buffer_job( &mic_instanceADC, buffer, samples );
+            break;
+        
+        case ADC_AUX:
+            adc_read_buffer_job( &aux_instanceADC, buffer, samples );
+            break;
+            
+        case ADC_CONF:
+            adc_read_buffer_job( &conf_instanceADC, buffer, samples );
+            break;
+            
+        default:
+            /* Do nothing */
+            break;
+    }
+}
+
+void adc_setChannel( adcChannel_t channel )
+{
+    adc_disableChannel( currChannel );
     
-    //adc_register_callback( &mic_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER );
-    //adc_enable_callback( &mic_instanceADC, ADC_CALLBACK_READ_BUFFER );
+    currChannel = channel;
     
-    adc_register_callback(&aux_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER);
-    adc_enable_callback(&aux_instanceADC, ADC_CALLBACK_READ_BUFFER);
+    adc_enableChannel( currChannel );
+}
+
+void adc_enableChannel( adcChannel_t channel )
+{
+    /* Enable the chosen channel */
+    switch( channel )
+    {
+        case ADC_MIC:
+            adc_enable( &mic_instanceADC );
+            adc_enable_callback( &mic_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+        
+        case ADC_AUX:
+            adc_enable( &aux_instanceADC );
+            adc_enable_callback( &aux_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+            
+        case ADC_CONF:
+            adc_enable( &conf_instanceADC );
+            adc_enable_callback( &conf_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+            
+        default:
+            /* Do nothing */
+            break;
+    }
+}
+
+void adc_disableChannel( adcChannel_t channel )
+{
+    /* Disable the chosen channel */
+    switch( channel )
+    {
+        case ADC_MIC:
+            adc_disable( &mic_instanceADC );
+            adc_disable_callback( &mic_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+        
+        case ADC_AUX:
+            adc_disable( &aux_instanceADC );
+            adc_disable_callback( &aux_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+            
+        case ADC_CONF:
+            adc_disable( &conf_instanceADC );
+            adc_disable_callback( &conf_instanceADC, ADC_CALLBACK_READ_BUFFER );
+            break;
+            
+        default:
+            /* Do nothing */
+            break;
+    }
+}
+
+void adc_configureCallbacks()
+{
+    adc_register_callback( &mic_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER );
+    adc_register_callback( &aux_instanceADC, adc_audioCallback, ADC_CALLBACK_READ_BUFFER );
+    adc_register_callback( &conf_instanceADC, adc_confCallback, ADC_CALLBACK_READ_BUFFER );
 }
 
 void adc_configureMic( void )
@@ -245,7 +332,6 @@ void adc_configureMic( void )
     config_adc.differential_mode    = true;
     
     adc_init( &mic_instanceADC, ADC, &config_adc );
-    adc_enable( &mic_instanceADC );
 }
 
 void adc_configureAux( void )
@@ -275,7 +361,6 @@ void adc_configureAux( void )
     config_adc.differential_mode    = true;
     
     adc_init( &aux_instanceADC, ADC, &config_adc );
-    adc_enable( &aux_instanceADC );
 }
 
 void adc_configureConf( void )
@@ -302,7 +387,6 @@ void adc_configureConf( void )
     config_adc.negative_input       = CONF_ADC_NEG;
     
     adc_init( &conf_instanceADC, ADC, &config_adc );
-    adc_enable( &conf_instanceADC );
 }
 
 void adc_configureAcc( void )
