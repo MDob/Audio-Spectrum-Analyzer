@@ -29,6 +29,13 @@ enum adcFlag {
     ACCY_DONE,
 };
 
+typedef enum {
+    AUDIO_BASS,
+    AUDIO_MIDS,
+    AUDIO_TREBLE,
+    NUM_AUDIO_TYPES
+}audioType_t;
+
 uint8_t adcFlags = 0;
 
 /*======================================================================*/
@@ -45,9 +52,7 @@ void adc_configureAux       ( void );
 void adc_configureConf      ( void );
 void adc_configureAcc       ( void );
 
-void setBass( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
-void setMids( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
-void setTreble( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC );
+void setAudio( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC, audioType_t type );
 
 /*======================================================================*/
 /*                          FUNCTION DECLARATIONS                       */
@@ -82,13 +87,13 @@ void TASK_adcFFT( void *pvParameters )
             /* Do something with result */
             if( LEDFlag & _LS(AUD) )
             {
-                setBass( &audioADCBuffer[1], ledSpectrum->freq.bassL, 4, BASS_L_LEN, audioADCBuffer[0] );
-                setBass( &audioADCBuffer[1], ledSpectrum->freq.bassR, 4, BASS_R_LEN, audioADCBuffer[0] );
+                setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassL, 4, BASS_L_LEN, audioADCBuffer[0], AUDIO_BASS );
+                setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassR, 4, BASS_R_LEN, audioADCBuffer[0], AUDIO_BASS );
                 
-                setMids( &audioADCBuffer[5], ledSpectrum->freq.midsL, 15, MID_L_LEN, audioADCBuffer[0] );
-                setMids( &audioADCBuffer[5], ledSpectrum->freq.midsR, 15, MID_L_LEN, audioADCBuffer[0] );
+                setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsL, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
+                setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsR, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
                 
-                setTreble( &audioADCBuffer[20], ledSpectrum->freq.treb, 43, TREB_LEN, audioADCBuffer[0] );
+                setAudio( &audioADCBuffer[20], ledSpectrum->freq.treb, 43, TREB_LEN, audioADCBuffer[0], AUDIO_TREBLE );
             }
             
             /* Clear it out */
@@ -102,7 +107,7 @@ void TASK_adcFFT( void *pvParameters )
     }
 }
 
-void setBass( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
+void setAudio( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC, audioType_t type )
 {
     uint16_t max = 0;
     uint16_t maxPos = 0;
@@ -124,89 +129,50 @@ void setBass( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uin
     
     for( uint16_t i = 0; i < lenLED; i++ )
     {
-        /* Green */
-        *LED = 0;
-        LED++;
-        
-        /* Red */
-        *LED = ((float)(*LED) * 0.8) + (float)((20 + ((255 - 20) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
-        
-        /* Blue */
-        *LED = ((float)(*LED) * 0.8) + (float)((25 + ((255 - 25) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
-    }
-}
-
-void setMids( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
-{
-    uint16_t max = 0;
-    uint16_t maxPos = 0;
-    uint16_t avg = 0;
-    
-    for( uint16_t i = 0; i < lenFreq; i++, freq++ )
-    {
-        if( *freq > max )
+        switch( type )
         {
-            max = *freq;
-            maxPos = i;
+            case AUDIO_BASS:
+                /* Green */
+                *LED = 0;
+                LED++;
+                    
+                /* Red */
+                *LED = ((float)(*LED) * 0.8) + (float)((20 + ((255 - 20) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+                    
+                /* Blue */
+                *LED = ((float)(*LED) * 0.8) + (float)((25 + ((255 - 25) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+                break;
+                
+            case AUDIO_MIDS:
+                /* Green */
+                *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+            
+                /* Red */
+                *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+            
+                /* Blue */
+                *LED = 0;
+                LED++;
+                break;
+                
+            case AUDIO_TREBLE:
+                /* Green */
+                *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+                
+                /* Red */
+                *LED = 0;
+                LED++;
+                
+                /* Blue */
+                *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
+                LED++;
+                break;
         }
-        
-        avg += *freq;
-    }
-    
-    // Calculate average intensity
-    avg /= lenFreq;
-    
-    for( uint16_t i = 0; i < lenLED; i++ )
-    {
-        /* Green */
-        *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
-        
-        /* Red */
-        *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
-        
-        /* Blue */
-        *LED = 0;
-        LED++;
-    }
-}
-
-void setTreble( int16_t *freq, uint8_t *LED, int16_t lenFreq, uint16_t lenLED, uint16_t binDC )
-{
-    uint16_t max = 0;
-    uint16_t maxPos = 0;
-    uint16_t avg = 0;
-    
-    for( uint16_t i = 0; i < lenFreq; i++, freq++ )
-    {
-        if( *freq > max )
-        {
-            max = *freq;
-            maxPos = i;
-        }
-        
-        avg += *freq;
-    }
-    
-    // Calculate average intensity
-    avg /= lenFreq;
-    
-    for( uint16_t i = 0; i < lenLED; i++ )
-    {
-        /* Green */
-        *LED = ((float)(*LED) * 0.8) + (float)((30 + ((255 - 30) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
-        
-        /* Red */
-        *LED = 0;
-        LED++;
-        
-        /* Blue */
-        *LED = ((float)(*LED) * 0.8) + (float)((5 + ((255 - 5) * ((float)max * 5/(float)binDC))) * 0.2);
-        LED++;
     }
 }
 
