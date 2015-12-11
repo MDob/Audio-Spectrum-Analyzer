@@ -45,11 +45,11 @@
 #define T0L 900
 #define RES 6000
 
-#define BASS_L_LEN      20
-#define BASS_R_LEN      20
-#define MID_L_LEN       36
-#define MID_R_LEN       36
-#define TREB_LEN        32
+#define BASS_L_LEN      45
+#define BASS_R_LEN      45
+#define MID_L_LEN       19
+#define MID_R_LEN       19
+#define TREB_LEN        16
 
 /*======================================================================*/
 /*                            TYPE DEFINITIONS                          */

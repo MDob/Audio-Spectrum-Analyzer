@@ -92,7 +92,7 @@ void    comm_shellErr           ( void );
 /*======================================================================*/
 void comm_shellErr( void )
 {
-    xQueueSend( xFTDITxQueue, "\r\nErroneous entry detected, please refactor your input", (TickType_t) 5 );
+    xQueueSend( xFTDITxQueue, "\r\nErroneous entry detected", (TickType_t) 5 );
     xQueueSend( xFTDITxQueue, ", please refactor your input\r\n", (TickType_t) 5 );
     comm_shellReset();
 }
@@ -254,7 +254,7 @@ void TASK_mainParser( void *pvParameters )
                         {
                             xQueueSend( xFTDITxQueue, "\r\nCommand list: rgb, blnk, ptrn\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "Use '/?' for command-", portMAX_DELAY );
-                            xQueueSend( xFTDITxQueue, "specific help", portMAX_DELAY );
+                            xQueueSend( xFTDITxQueue, "specific help\r\n", portMAX_DELAY );
                             break;
                         }
                         case CMD_HELP_2:

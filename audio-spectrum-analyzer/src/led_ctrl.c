@@ -90,43 +90,65 @@ void led_fadingRainbow( bool reset )
     switch( state )
     {
         case 0:
+        {
             if( stripColour.colour.blue >= 2 )
+            {
                 stripColour.colour.blue-=2;
-        
-            stripColour.colour.red++;
-            if(stripColour.colour.red >= 255)
-                state = 1;
+            }            
             
+            stripColour.colour.red++;
+            
+            if(stripColour.colour.red >= 255)
+            {
+                state = 1;
+            }                
             else if(stripColour.colour.red >= 200)
-            stripColour.colour.green++;
-
-            break;
+            {
+                stripColour.colour.green++;
+            }                
+        }
+        break;
             
         case 1:
+        {
             if( stripColour.colour.red >= 2 )
+            {
                 stripColour.colour.red-=2;
+            }                
         
             stripColour.colour.green++;
+            
             if(stripColour.colour.green >= 255)
+            {
                 state = 2;
-                
+            }            
             else if(stripColour.colour.green >= 200)
+            {
                 stripColour.colour.blue++;
-                
-            break;
+            }                
+        }                
+        break;
             
         case 2:
+        {
             if( stripColour.colour.red >= 2 )
+            {
                 stripColour.colour.red-=2;
+            }                
         
             if( stripColour.colour.green >= 2 )
+            {
                 stripColour.colour.green-=2;
+            }                
         
             stripColour.colour.blue++;
+            
             if(stripColour.colour.blue >= 255)
+            {
                 state = 0;
-                
-            break;
+            }                
+        }
+        break;
     }    
 }
 
@@ -146,6 +168,7 @@ void led_shiftStrip( bool direction )
                 LED_getLED( &nextLED, LED_NUM-1 );
                 LED_setLED( &nextLED, i );
             }
+            
             LED_getLED( &nextLED, i+1);
             LED_setLED( &tempLED, i+1 );
             tempLED = nextLED;
@@ -222,40 +245,56 @@ void led_swirlyColours( bool reset )
         if( i % 2 )
         {
             LED_setLED( &singleLed, i );
-            }else{
+        }
+        else
+        {
             if((i - sec_led) == 0)
             {
                 LED_setLED( &onLED, i );
-                }else{
+            }
+            else
+            {
                 LED_setLED( &offLED, i );
             }
         }
     }
     
-    if(col){
+    if(col)
+    {
         sec_led += 2;
         if(sec_led >= 144)
-        col = false;
-        }else{
+        {
+            col = false;
+        }
+    }
+    else
+    {
         sec_led -= 2;
         if(sec_led <= 0)
-        col = true;
+        {
+            col = true;
+        }
     }
     
-    
-    if(up){
+    if(up)
+    {
         singleLed.colour.red++;
         onLED.colour.red++;
         
         if(singleLed.colour.red >= 255)
-        up = false;
-        
-        }else{
+        {
+            up = false;
+        }            
+    }
+    else
+    {
         singleLed.colour.red--;
         onLED.colour.red--;
         
         if(singleLed.colour.red <= 0)
-        up = true;
+        {
+            up = true;
+        }            
     }
 }
 
@@ -287,7 +326,9 @@ void led_blink( LED_Data_t *strip, uint32_t milliseconds )
     if( on )
     {
         led_setStrip(strip);
-    } else {
+    }
+    else
+    {
         led_setStrip(&led);
     }
 }
@@ -298,34 +339,43 @@ void led_pattern( patternType pattern )
     switch( pattern )
     {
         case RUNNING:
-            if((currState != RUNNING) || !(LEDFlag & _LS(PTRN)))
+            if( ( currState != RUNNING ) || ! ( LEDFlag & _LS( PTRN ) ) )
             {
                 currState = RUNNING; 
                 led_runningRainbow( true );
-            }else{
+            }
+            else
+            {
                 led_runningRainbow( false );
             }
-            break;
+        break;
+        
         case RAINBOW:
-            if(currState != RAINBOW || !(LEDFlag & _LS(PTRN)))
+            if( currState != RAINBOW || ! ( LEDFlag & _LS( PTRN ) ) )
             {
                 currState = RAINBOW;
                 led_fadingRainbow( true );
-            }else{
+            }
+            else
+            {
                 led_fadingRainbow( false );
             }
-            break;
+        break;
+        
         case SWIRL:
-            if(currState != SWIRL || !(LEDFlag & _LS(PTRN)))
+            if( currState != SWIRL || ! ( LEDFlag & _LS( PTRN ) ) )
             {
                 currState = SWIRL;
                 led_swirlyColours( true );
-            }else{
+            }
+            else
+            {
                 led_swirlyColours( false );
             }
-            break;
+        break;
+        
         default:
-            break;
+        break;
     }
 }
 
@@ -350,25 +400,41 @@ void TASK_outputFormingLED( void *pvParameters )
         switch( rxLED.cmd )
         {
             case RGB:
+            {
                 LEDFlag = _LS(RGB);
                 led_setStrip( &rxLED.LED );
-                break;
+            }                
+            break;
+            
             case BLNK:
+            {
                 LEDFlag = _LS(BLNK);
                 if(rxLED.period <= 0)
+                {
                     led_setStrip( &rxLED.LED );
+                }                    
                 else
+                {
                     led_blink( &rxLED.LED, rxLED.period );
-                break;
+                }                    
+            }                    
+            break;
+            
             case PTRN:
+            {
                 led_pattern( rxLED.pattern );
                 LEDFlag = _LS(PTRN);
-                break;
+            }                
+            break;
+            
             case AUD:
+            {
                 LEDFlag = _LS(AUD);
-                break;
+            }                
+            break;
+            
             default:
-                break;
+            break;
         }
 
         taskENTER_CRITICAL();
