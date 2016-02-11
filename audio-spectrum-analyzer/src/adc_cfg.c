@@ -84,7 +84,7 @@ void TASK_adcFFT( void *pvParameters )
     
     for(;;)
     {
-        if( adcFlags & _LS( AUDIO_DONE ) )
+        if( ( adcFlags & _LS( AUDIO_DONE ) ) && ( LEDFlag & _LS( AUD ) ) )
         {
             memset( audioImag, 0x00, sizeof( audioImag ) );
             
@@ -101,17 +101,14 @@ void TASK_adcFFT( void *pvParameters )
             }
             
             /* Do something with result */
-            if( LEDFlag & _LS(AUD) )
-            {
-                //setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassL, 4, BASS_L_LEN, audioADCBuffer[0], AUDIO_BASS );
-                //setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassR, 4, BASS_R_LEN, audioADCBuffer[0], AUDIO_BASS );
+            //setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassL, 4, BASS_L_LEN, audioADCBuffer[0], AUDIO_BASS );
+            //setAudio( &audioADCBuffer[1], ledSpectrum->freq.bassR, 4, BASS_R_LEN, audioADCBuffer[0], AUDIO_BASS );
                 
-                //setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsL, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
-                //setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsR, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
+            //setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsL, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
+            //setAudio( &audioADCBuffer[5], ledSpectrum->freq.midsR, 15, MID_L_LEN, audioADCBuffer[0], AUDIO_MIDS );
                 
-                //setAudio( &audioADCBuffer[20], ledSpectrum->freq.treb, 43, TREB_LEN, audioADCBuffer[0], AUDIO_TREBLE );
-                beatDetect( &audioADCBuffer[1], ledSpectrum->array, 62, LED_NUM, audioADCBuffer[0], 255, 0, 0, 2, 5, 0.8);
-            }
+            //setAudio( &audioADCBuffer[20], ledSpectrum->freq.treb, 43, TREB_LEN, audioADCBuffer[0], AUDIO_TREBLE );
+            beatDetect( &audioADCBuffer[1], ledSpectrum->array, 62, LED_NUM, audioADCBuffer[0], 255, 0, 0, 2, 5, 0.8);
             
             /* Clear buffer */
             memset( audioADCBuffer, 0x00, sizeof( audioADCBuffer ) );

@@ -111,7 +111,7 @@ static void setupTasks( void )
     /* Communications Tasks */
     xTaskCreate(    TASK_FTDI,              ( const char* ) "FTDI",         100,    NULL,   1,  NULL );
     xTaskCreate(    TASK_mainParser,        ( const char* ) "PARSE",        100,    NULL,   1,  NULL );
-    //xTaskCreate(    TASK_ReadBluetooth,     ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
+    xTaskCreate(    TASK_Bluetooth,         ( const char* ) "BLUETOOTH",    100,    NULL,   1,  NULL );
 
     /* LED Tasks */
     xTaskCreate(    TASK_outputFormingLED,  ( const char* ) "LED_OUT",      100,    NULL,   1,  NULL );

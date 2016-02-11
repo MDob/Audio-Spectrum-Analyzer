@@ -19,6 +19,7 @@
 #include "adc.h"
 #include "adc_callback.h"
 #include "extint.h"
+#include "led_cfg.h"
 
 /*======================================================================*/
 /*                          FUNCTION PROTOTYPES                         */
@@ -44,13 +45,31 @@ void CONFIG_configurePins( void )
 
 void config_SWTriggered( void )
 {
+    static bool reset = false;
+    LED_Packet_t ledPacket;
+    
     // Find a better way to double check this
     // Interrupt triggered on first tick for some reason...
     if( extint_chan_is_detected( SW0_EIC_LINE ) || button )
     {
         //adc_read_buffer_job(&conf_instanceADC, &confADCBuffer, 1);
         //adc_read_buffer_job(&aux_instanceADC, &auxADCBuffer, 128);
-        
+        if(reset == true)
+        {
+            reset = false;
+            ledPacket.cmd = RGB;
+            ledPacket.LED.colour.blue = 0;
+            ledPacket.LED.colour.red = 180;
+            ledPacket.LED.colour.green = 60;
+            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
+        }
+        else
+        {
+            reset = true;
+            ledPacket.cmd = PTRN;
+            ledPacket.pattern = 3;
+            xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
+        }
     }
     button = true;
 }

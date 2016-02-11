@@ -206,6 +206,7 @@ void TASK_mainParser( void *pvParameters )
                             ledPacket.LED.colour.blue  = atoi( (const char*) argv[3]);
                             
                             xQueueSend( xFTDITxQueue, "\r\nColour Set!\r\n", (TickType_t) 5 );
+/*                            xQueueSend( xBluetoothTxQueue, "\r\nColour Set!\r\n", (TickType_t) 5 );*/
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
@@ -215,6 +216,7 @@ void TASK_mainParser( void *pvParameters )
                             ledPacket.pattern = atoi( (const char*) argv[1] );
                             
                             xQueueSend( xFTDITxQueue, "\r\nPattern Set!\r\n", (TickType_t) 5 );
+/*                            xQueueSend( xBluetoothTxQueue, "\r\nPattern Set!\r\n", (TickType_t) 5 );*/
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
@@ -239,6 +241,7 @@ void TASK_mainParser( void *pvParameters )
                             ledPacket.cmd       = BLNK;
                             ledPacket.period    = atoi( (const char*) argv[1]);
                             xQueueSend( xFTDITxQueue, "\r\nBlink Period Set!\r\n", (TickType_t) 5 );
+/*                            xQueueSend( xBluetoothTxQueue, "\r\nBlink Period Set!\r\n", (TickType_t) 5 );*/
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
@@ -246,6 +249,7 @@ void TASK_mainParser( void *pvParameters )
                         {
                             ledPacket.cmd = AUD;
                             xQueueSend( xFTDITxQueue, "\r\nAudio Reactivity On!\r\n", (TickType_t) 5 );
+/*                            xQueueSend( xBluetoothTxQueue, "\r\nAudio Reactivity On!\r\n", (TickType_t) 5 );*/
                             xQueueSend( xLEDQueue, &ledPacket, (TickType_t) 0 );
                             break;
                         }
@@ -255,6 +259,10 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xFTDITxQueue, "\r\nCommand list: rgb, blnk, ptrn\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "Use '/?' for command-", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "specific help\r\n", portMAX_DELAY );
+                            
+//                             xQueueSend( xBluetoothTxQueue, "\r\nCommand list: rgb, blnk, ptrn\r\n", portMAX_DELAY );
+//                             xQueueSend( xBluetoothTxQueue, "Use '/?' for command-", portMAX_DELAY );
+//                             xQueueSend( xBluetoothTxQueue, "specific help\r\n", portMAX_DELAY );
                             break;
                         }
                         case CMD_HELP_2:
@@ -264,6 +272,10 @@ void TASK_mainParser( void *pvParameters )
                             xQueueSend( xFTDITxQueue, "rgb usage: \'rgb R G B\' (0-255)\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "blnk usage: \'blnk #\' (20-9999 ms)\r\n", portMAX_DELAY );
                             xQueueSend( xFTDITxQueue, "ptrn usage: \'ptrn #\' (0-2)\r\n", portMAX_DELAY );
+                            
+//                             xQueueSend( xBluetoothTxQueue, "rgb usage: \'rgb R G B\' (0-255)\r\n", portMAX_DELAY );
+//                             xQueueSend( xBluetoothTxQueue, "blnk usage: \'blnk #\' (20-9999 ms)\r\n", portMAX_DELAY );
+//                             xQueueSend( xBluetoothTxQueue, "ptrn usage: \'ptrn #\' (0-2)\r\n", portMAX_DELAY );
                             break;
                         }
                         default:

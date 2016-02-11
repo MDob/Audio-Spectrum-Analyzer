@@ -39,7 +39,8 @@
 
 #define FTDI_RX_BUFFER_LEN      1
 #define FTDI_TX_BUFFER_LEN      48
-#define BLUETOOTH_BUFFER_LEN    4
+#define BLUETOOTH_RX_BUFFER_LEN 1
+#define BLUETOOTH_TX_BUFFER_LEN 48
 
 /*======================================================================*/
 /*                      GLOBAL VARIABLE DEFINITIONS                     */
@@ -70,8 +71,8 @@ enum DMA_Status_Flags {
     FTDI_TX_DONE,
     FTDI_RX_DONE,
     
-    BT_TX_DONE,
-    BT_RX_DONE,
+    BLUETOOTH_TX_DONE,
+    BLUETOOTH_RX_DONE,
     
     MAX_DMA_STATUSES
 };
@@ -99,8 +100,8 @@ uint8_t     LED_RxBuffer[LED_RX_BUFFER_LEN];
 uint8_t    FTDI_TxBuffer[FTDI_TX_BUFFER_LEN];
 uint8_t    FTDI_RxBuffer[FTDI_RX_BUFFER_LEN];
 
-uint16_t    Bluetooth_TxBuffer[BLUETOOTH_BUFFER_LEN];
-uint16_t    Bluetooth_RxBuffer[BLUETOOTH_BUFFER_LEN];
+uint16_t    Bluetooth_TxBuffer[BLUETOOTH_TX_BUFFER_LEN];
+uint16_t    Bluetooth_RxBuffer[BLUETOOTH_RX_BUFFER_LEN];
 
 //uint8_t     LED_PWMBuffer[LED_PWM_BUFFER_LEN];
 

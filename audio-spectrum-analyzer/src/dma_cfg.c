@@ -182,11 +182,11 @@ void DMA_configureBluetooth( void )
     
     /* Setup DMA Tx/Rx descriptors */
     dma_setupDescriptor(    &DMA_TxBluetoothDescriptor, txSourceAddress,
-                            txDestinationAddress, BLUETOOTH_BUFFER_LEN,
+                            txDestinationAddress, BLUETOOTH_TX_BUFFER_LEN,
                             DMA_BEAT_SIZE_HWORD, true, false );
                             
     dma_setupDescriptor(    &DMA_RxBluetoothDescriptor, rxSourceAddress,
-                            rxDestinationAddress, BLUETOOTH_BUFFER_LEN,
+                            rxDestinationAddress, BLUETOOTH_RX_BUFFER_LEN,
                             DMA_BEAT_SIZE_HWORD, false, true );
 
     /* Add DMA Tx/Rx descriptors to DMA Tx/Rx resources */

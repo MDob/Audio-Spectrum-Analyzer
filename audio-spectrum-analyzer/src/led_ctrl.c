@@ -221,6 +221,41 @@ void led_runningRainbow( bool reset )
     
 }
 
+void led_red_yellow( bool reset )
+{
+    static uint8_t state = 0;
+    static LED_Data_t stripColour = {
+        .colour.red     = 0,
+        .colour.green   = 0,
+        .colour.blue    = 0
+    };
+
+    if( reset )
+    {
+        // Reset state and stripColour to 0
+        //memset(&stripColour, 0x00, sizeof(stripColour));
+        stripColour.colour.red = 180;
+        stripColour.colour.green = 60;
+        state = 0;
+    }
+
+    for(uint8_t i = 0; i < LED_NUM; i++)
+    {
+        LED_setLED( &stripColour, i );
+    }
+    
+    if(stripColour.colour.green > 1)
+    {
+        stripColour.colour.green -= 2;
+    }
+    
+    if(stripColour.colour.red < 254)
+    {
+        stripColour.colour.red += 2;
+    }
+    
+}
+
 void led_swirlyColours( bool reset )
 {
     static uint8_t sec_led = 0;
@@ -374,6 +409,16 @@ void led_pattern( patternType pattern )
             }
         break;
         
+        case FILM:
+            if( currState != FILM || ! (LEDFlag & _LS( PTRN ) ) )
+            {
+                currState = FILM;
+                led_red_yellow( true );
+            }
+            else
+            {
+                led_red_yellow( false );
+            }
         default:
         break;
     }

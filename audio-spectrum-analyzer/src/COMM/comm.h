@@ -60,6 +60,7 @@
 
 #define MAX_CALLBACK_BUFFER_LEN 5
 #define FTDI_MAX_RX_LEN         32
+#define BLUETOOTH_MAX_RX_LEN    32
 
 /* SPI */
 #define SPI_BAUDRATE            3500000UL
@@ -82,7 +83,7 @@ SemaphoreHandle_t txSemaphoreFTDI, rxSemaphoreFTDI;
 SemaphoreHandle_t txSemaphoreBluetooth, rxSemaphoreBluetooth;
 
 QueueHandle_t xFTDITxQueue, xFTDIRxQueue;
-QueueHandle_t xBTTxQueue, xBTRxQueue;
+QueueHandle_t xBluetoothTxQueue, xBluetoothRxQueue;
 QueueHandle_t xParserQueue;
 
 /* SPI */

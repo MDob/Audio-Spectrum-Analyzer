@@ -70,6 +70,7 @@ typedef enum {
     RAINBOW,
     SWIRL,
     RUNNING,
+    FILM,
     NUM_PATTERN,
 }patternType;
 

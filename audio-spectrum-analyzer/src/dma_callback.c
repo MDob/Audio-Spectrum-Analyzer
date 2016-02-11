@@ -76,25 +76,19 @@ void dma_FTDIRxDone( struct dma_resource* const resource )
 void dma_BluetoothTxDone( struct dma_resource* const resource )
 {
     /* Set status flag */
-    DMA_Status |= _LS( BT_TX_DONE );
+    DMA_Status |= _LS( BLUETOOTH_TX_DONE );
 }
 
 void dma_BluetoothRxDone( struct dma_resource* const resource )
 {
-    static portBASE_TYPE wake_task = pdFALSE;
+    static BaseType_t xHigherPriorityTaskWoken;
     
-    /* Ensure that the semaphore exists */
-    Assert( rxSemaphoreBluetooth );
+    /* Set status flag */
+    DMA_Status |= _LS( BLUETOOTH_RX_DONE );
     
-    /* Continue reading the incoming Bluetooth data stream */
-    dma_start_transfer_job( &zDMA_BluetoothResourceRx );
+    xHigherPriorityTaskWoken = pdFALSE;
     
     /* Unblock parsing task */
-    xSemaphoreGiveFromISR( rxSemaphoreBluetooth, &wake_task );
-    
-    /* Allow the parsing task to take over */
-    if( wake_task == pdTRUE )
-    {
-        portYIELD();
-    }
+    xSemaphoreGiveFromISR( rxSemaphoreBluetooth, &xHigherPriorityTaskWoken );
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }

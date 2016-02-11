@@ -235,29 +235,101 @@ void TASK_FTDI( void *pvParameters )
 void TASK_Bluetooth( void *pvParameters )
 {
     UNUSED( pvParameters );
-    
+        
+    static char rxBuffer[BLUETOOTH_MAX_RX_LEN];
+    static char *Rx = rxBuffer;
+    char Tx[BLUETOOTH_TX_BUFFER_LEN];
+        
     /* Create a semaphore */
     rxSemaphoreBluetooth = xSemaphoreCreateBinary();
-    
-    /* Ensure that the semaphore is valid */
+        
+    /* Ensure that semaphore is valid */
     Assert( rxSemaphoreBluetooth );
-    
-    /* Start DMA reception */
+        
+    /* Create a queue */
+    xBluetoothTxQueue = xQueueCreate( 3, BLUETOOTH_TX_BUFFER_LEN * sizeof( char ) );
+    xBluetoothRxQueue = xQueueCreate( BLUETOOTH_MAX_RX_LEN, sizeof( uint16_t ) );
+        
+    /* Ensure that the queue is valid */
+    Assert( xBluetoothTxQueue );
+    Assert( xBluetoothRxQueue );
+
+    /* Start reading */
     dma_start_transfer_job( &zDMA_BluetoothResourceRx );
 
     for(;;)
     {
+        if( xQueueReceive( xBluetoothTxQueue, Tx, ( TickType_t ) 0 ) == pdTRUE )
+        {
+            strncpy((char *)Bluetooth_TxBuffer, Tx, sizeof(FTDI_TxBuffer));
+            dma_start_transfer_job(&zDMA_BluetoothResourceTx);
+            while( !( DMA_Status & _LS(BLUETOOTH_TX_DONE) ) )
+            {
+                taskYIELD();
+            }
+            DMA_Status &= !(_LS(BLUETOOTH_TX_DONE));
+        }
+            
         /* Block task until DMA read complete */
-        xSemaphoreTake( rxSemaphoreBluetooth, portMAX_DELAY );
-        
-        /* Parse AT commands */
-        
-        /* Respond with ACK/NAK */
-        
-        /* Send AT command back if necessary */
-        dma_start_transfer_job( &zDMA_BluetoothResourceTx );
-        
-        /* Yield to oncoming traffic */
+        if( xSemaphoreTake( rxSemaphoreBluetooth, 5 ) == pdTRUE )
+        {
+            if( xBluetoothTxQueue != 0)
+            {
+                xQueueSend( xBluetoothTxQueue, Bluetooth_RxBuffer, ( TickType_t ) 0 );
+            }
+            /* Look for backspace character */
+            if( *Bluetooth_RxBuffer == 127 )
+            {
+                if( Rx != rxBuffer )
+                {
+                    Rx--;
+                    *Rx = 0;
+                }
+            }
+            else if( *Bluetooth_RxBuffer == 13 ) // Carriage return
+            {
+                memcpy( Rx, "\0", sizeof( char ) );
+                /* Pass command to the main parser */
+                if( xParserQueue != 0 )
+                {
+                    xQueueSend( xParserQueue, rxBuffer, ( TickType_t ) 10 );
+                }
+                Rx = rxBuffer;
+            }
+            else if( !strcmp( ( const char * ) Bluetooth_RxBuffer, "\027[D" ) ) // Left arrow ANSI
+            {
+                /* Move pointer around */
+            }
+            else if( !strcmp( ( const char * ) Bluetooth_RxBuffer, "\027[C" ) ) // Right arrow ANSI
+            {
+                /* Move pointer around */
+            }
+            else if( !strcmp( ( const char * ) Bluetooth_RxBuffer, "\027[A" ) ) // Up arrow ANSI
+            {
+                /* Previous command */
+            }
+            else if( !strcmp( ( const char * ) Bluetooth_RxBuffer, "\027[B" ) ) // Down arrow ANSI
+            {
+                /* Next command, if available */
+            }
+            else
+            {
+                /* Copy byte into buffer */
+                *Rx = ( char ) *Bluetooth_RxBuffer;
+                    
+                /* Reset buffer pointer on overflow */
+                if( Rx == &rxBuffer[BLUETOOTH_MAX_RX_LEN-1] )
+                {
+                    Rx = rxBuffer;
+                }
+                else
+                {
+                    Rx++;
+                }
+            }
+            dma_start_transfer_job( &zDMA_BluetoothResourceRx );
+        }
+
         taskYIELD();
     }
 }
